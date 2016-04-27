@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module xmlns="http://www.esmartpoint.com/schema/random-generator"
+	xmlns:db="http://www.esmartpoint.com/schema/db-random-generator"
+	xmlns:logic="http://www.esmartpoint.com/schema/logic-random-generator"
+	xmlns:http="http://www.esmartpoint.com/schema/genesis/http">
+	
+	<!-- 
+	<db:open
+		driverClassName="com.mysql.jdbc.Driver" 
+		url="jdbc:mysql://localhost:3306/ridermove-test?useUnicode=yes&amp;characterEncoding=UTF-8" 
+		username="ridermove" password="ridermove" 
+		dialect="org.hibernate.dialect.MySQL5InnoDBDialect" />
+
+	 -->
+	 
+	<db:open
+		driverClassName="org.postgresql.Driver" 
+		url="jdbc:postgresql://localhost:5432/ridermove?charSet=UTF8" 
+		username="postgres" password="wwwwww" 
+		dialect="org.hibernate.dialect.PostgreSQLDialect" />
+	 
+	<set var="DIALECT" value="'postgresql'" scope="global"/>
+	<set var="MAX_USERS" value="250000" />
+	<set var="MAX_LUGARES" value="100" />
+	
+	<set var="ridermoveElasticsearchUrl" value="'http://localhost:9200/ridermove'" scope="global" />
+	
+	<http:delete url="globals.ridermoveElasticsearchUrl+'/lugar'" result="result" resultType="JSON" />
+	<!-- <assert condition="result.acknowledged==true" /> -->
+	
+	<http:post url="globals.ridermoveElasticsearchUrl+'/lugar'" result="result" resultType="JSON">
+		{
+			"settings": {
+		      "mapping.allow_type_wrapper": true,
+		      "number_of_shards" : 1,
+              "number_of_replicas" : 0
+			}
+		}
+	</http:post>
+	<assert condition="result.created==true" />
+	
+	<def var="secuences" type="java.util.HashMap" scope="global" />
+	
+	<set var="secuences" scope="global">
+		<field name="snm_entities" value="0" />
+		<field name="snm_archives" value="0" />
+	</set>
+	
+	<!-- 
+	<logic:if test="globals.DIALECT == 'postgresql'">
+		<db:script>
+			delete from snm_entities;
+			delete from snm_users;
+			delete from snm_user_roles;
+			delete from user_profile;
+			delete from snm_archives;
+			delete from snm_entity_followers;
+			delete from snm_entity_tasks;
+			delete from lugares;
+			delete from snm_activities;
+		</db:script>
+	</logic:if>
+	
+	<logic:if test="globals.DIALECT == 'mysql'">
+		<db:script>
+			delete from snm_entities;
+			delete from snm_users;
+			delete from snm_user_roles;
+			delete from user_profile;
+			delete from snm_archives;
+			delete from snm_entity_followers;
+			delete from snm_entity_tasks;
+			delete from lugares;
+			delete from snm_activities;
+			ALTER TABLE snm_entities AUTO_INCREMENT=1;
+			ALTER TABLE snm_users AUTO_INCREMENT=1;
+			ALTER TABLE snm_archives AUTO_INCREMENT=1;
+			ALTER TABLE snm_user_roles AUTO_INCREMENT=1;
+			ALTER TABLE lugares AUTO_INCREMENT=1;
+			ALTER TABLE snm_activities AUTO_INCREMENT=1;
+		</db:script>	
+	</logic:if>
+	 -->
+	 	
+	<!-- 
+	<debug>${generator.randomText(64, 4000, '\r\n', 64, 400, 12, 64, 3, 8)}</debug>
+	 -->
+	
+	<execute file="generate-users.xml">
+		<input name="userCount" value="MAX_USERS" />
+		<output name="userList"/>
+		<output name="userSelector" />
+	</execute>
+	
+	<execute file="generate-lugares.xml">
+		<input name="lugarCount" value="MAX_LUGARES" />
+		<input name="userList"/>
+		<input name="userSelector" />
+		<output name="lugarList"/>
+	</execute>
+	
+	<debug>Numero de usuarios: ${userList.size()}</debug>
+	<debug>Numero de lugares: ${lugarList.size()}</debug>
+
+	<db:close />
+	
+</module>

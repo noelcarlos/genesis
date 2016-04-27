@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module xmlns="http://www.esmartpoint.com/schema/random-generator"
+	xmlns:db="http://www.esmartpoint.com/schema/db-random-generator">
+	
+	<input name="lugarCount"/>
+	<input name="userList"/>
+	<input name="userSelector" />
+	<output name="lugarList" />
+	
+	<selector var="isDeleted">
+		<item weight="10" value="true"/>
+		<item weight="90" value="false"/>
+	</selector>
+	
+	<selector var="isActive">
+		<item weight="10" value="true"/>
+		<item weight="90" value="false"/>
+	</selector>
+
+	<selector var="browserType">
+		<item weight="30" value="'Firefox'"/>
+		<item weight="40" value="'Chrome'"/>
+		<item weight="25" value="'IE'"/>
+		<item weight="5" value="'Other'"/>
+	</selector>	
+
+	<selector var="emailDomain">
+		<item weight="10" value="'ridermove.com'"/>
+		<item weight="30" value="'hotmail.com'"/>
+		<item weight="40" value="'gmail.com'"/>
+		<item weight="5" value="'yahoo.com'"/>
+		<item weight="5" value="'aol.com'"/>
+	</selector>		
+
+	<selector var="rank">
+		<item weight="10" value="1"/>
+		<item weight="20" value="2"/>
+		<item weight="30" value="3"/>
+		<item weight="50" value="4"/>
+		<item weight="10" value="5"/>
+	</selector>
+	
+	<db:load var="entityClass">
+		select * from snm_classes where package_name='org.rider.model' and class_name='Lugar'
+	</db:load>
+	
+	<selector var="fileExtension">
+		<item weight="75" value="'jpg'"/>
+		<item weight="20" value="'png'"/>
+		<item weight="5" value="'bmp'"/>
+	</selector>
+	
+	<generate title="snm_lugares" 
+		var="lugarList" element="data.lugar_id" type="fixed" size="lugarCount">
+		
+		<set var="firstName" value="generator.randomFirstName()" />
+		<set var="lastName" value="generator.randomLastName()" />
+		<set var="createAt" value="generator.randomDate(new org.joda.time.DateTime(2000, 1,  1, 0, 0), new org.joda.time.DateTime(2014, 1,  1, 0, 0))" />
+		<set var="modifiedAt" value="generator.randomDate(createAt, new org.joda.time.DateTime().now())" />
+		<set var="lastLogonAt" value="generator.randomDate(createAt, modifiedAt)" />
+		
+		<set var="entity" type="java.lang.HashMap">
+			<set field="name" value="generator.randomTitle(10, 64, 2, 8)" />
+			<set field="created_by" value="userSelector.getNext()" />
+			<set field="created_on" value="createAt.toDate()" />
+			<set field="entity_class_id" value="entityClass.id" />
+			<set field="rank" value="rank.getNext()" />
+			<set field="human_url_name" value="generator.toHumanURL(entity.name, 128)" />
+			<set field="is_deleted" value="generator.randomBoolean(90, 10)" />
+			<set field="modified_by" value="null" />
+			<set field="modified_on" value="createAt.toDate()" />
+			
+			<set field="num_comments" value="generator.randomInt(0, 1000)" />
+			<set field="num_documents" value="generator.randomInt(0, 1000)" />
+			<set field="num_evaluations" value="generator.randomInt(0, 1000)" />
+			<set field="num_likes" value="generator.randomInt(0, 1000)" />
+			<set field="num_nolikes" value="generator.randomInt(0, 1000)" />
+			<set field="num_members" value="generator.randomInt(0, 1000)" />
+			<set field="num_posts" value="generator.randomInt(0, 1000)" />
+			<set field="num_tasks" value="generator.randomInt(0, 1000)" />
+			<set field="num_visits" value="generator.randomInt(0, 1000)" />
+			<set field="num_notes" value="generator.randomInt(0, 1000)" />
+			<set field="num_followers" value="generator.randomInt(0, 1000)" />
+			<set field="num_questions" value="generator.randomInt(0, 1000)" />
+			<set field="num_suggests" value="generator.randomInt(0, 1000)" />
+		</set>
+		
+		<set var="userSelected" value="userSelector.getNext()" />
+		<set var="ext" value="fileExtension.getNext()" />
+		
+		<http:post url="ridermoveElasticsearchUrl+'/lugar/' + id">
+			{
+		        "entity": {
+		            "name": "${generator.randomTitle(10, 64, 2, 8)}",
+		            "entityClassName": "lugar",
+		            "entityClassPackageName": "org.rider.model",
+		            "entityClassClassName": "Lugar",
+		            "entityClassId": 100,
+		            "createdById": ${id},
+		            "createdByEmail": "${userSelected.email}",
+		            "createdByFirstName": "${userSelected.firstName}",
+		            "createdByAvatarLocation": "avatars/${generator.randomFilename(10,28,3,8,ext)}",
+		            "createdByAvatarType": "avatar",
+		            "createdByAvatarId": 26791,
+		            "createdOn": "${createAt.toDate()}",
+		            "modifiedOn": "${modifiedAt.toDate()}",
+		            "isDeleted": true,
+		            "humanUrlName": "${generator.toHumanURL($firstName, 128)}",
+		            "numLikes": ${generator.randomInt(0, 1000)},
+		            "numVisits": ${generator.randomInt(0, 1000)},
+		            "numComments": ${generator.randomInt(0, 1000)},
+		            "numPosts": ${generator.randomInt(0, 1000)},
+		            "numMembers": ${generator.randomInt(0, 1000)},
+		            "numEvaluations": ${generator.randomInt(0, 1000)},
+		            "numDocuments": ${generator.randomInt(0, 1000)},
+		            "numNolikes": ${generator.randomInt(0, 1000)},
+		            "numNotes": ${generator.randomInt(0, 1000)},
+		            "numTasks": ${generator.randomInt(0, 1000)},
+		            "numFollowers": ${generator.randomInt(0, 1000)},
+		            "numQuestions": ${generator.randomInt(0, 1000)},
+		            "numSuggests": ${generator.randomInt(0, 1000)},
+		            "rank": ${generator.randomInt(0, 5)},
+		            "categories": [
+					  ${deporteSelector.restart()}
+					  #foreach ($i in [1 .. $generator.randomInt(1, 5)] )
+					  	#set ($value = $deporteSelector.nextUnique())
+					      {
+					          "categoryId": ${value.category_id},
+					          "name": "${value.name}",
+					          "contextId": 104,
+					          "contextName": "deporte"
+					      }#if( $foreach.hasNext ), #end		            	
+					  #end
+		            ],
+		            "tags": [
+					  ${tagSelector.restart()}
+					  #foreach ($i in [1 .. $generator.randomInt(1, 5)] )
+					  	#set ($value = $tagSelector.nextUnique())
+					      {
+		                    "tagId": ${value.id},
+		                    "name": "${value.name}",
+		                    "contextId": 130,
+		                    "contextName": "lugar.tag"
+					      }#if( $foreach.hasNext ), #end		            	
+					  #end
+		            ]
+		        },
+		        "description": "${generator.randomParagraph(128, 500, 10, 64, 2, 8)}",
+		        "firstName": "${firstName}",
+		        "lastName": "${lastName1} ${lastName2}",
+		        "isDeleted": ${generator.randomBoolean(90, 10)},
+		        "isActive": ${generator.randomBoolean(90, 10)},
+		        "lastLogonAt": "${lastLogonAt.toDate()}",
+		        "lastLogonIp": "${generator.randomIP()}",
+		        "browserType": "${browserType.getNext()}",
+		        "email": "${firstName.toLowerCase()}.${lastName1.toLowerCase()}@${emailDomain.getNext()}",
+		        "password": "secret",
+		        "resumen": "${generator.randomParagraph(128, 500, 10, 64, 2, 8)}",
+		        "presentacionPersonal": "${generator.randomTitle(10, 50, 2, 8)}",
+		        "actionbarBackgroundColor": "${generator.randomHexNumeric(6)}",
+		        "servicios": [
+					  ${servicioSelector.restart()}
+					  #foreach ($i in [1 .. $generator.randomInt(1, 5)] )
+					  	#set ($value = $servicioSelector.nextUnique())
+					      {
+		                "tagId": ${value.id},
+		                "name": "${value.name}",
+		                "contextId": 127,
+		                "contextName": "lugar.servicio"
+					      }#if( $foreach.hasNext ), #end		            	
+					  #end
+		        ],
+		        "locations": [
+					  ${deporteSelector.restart()}
+					  #foreach ($i in [1 .. $generator.randomInt(1, 5)] )
+					  	#set ($value = $deporteSelector.nextUnique())
+					      {
+		                	"tagId": ${value.category_id},
+		                	"name": "${value.name}",
+		                	"contextId": 126,
+		                	"contextName": "ciudad"
+					      }#if( $foreach.hasNext ), #end		            	
+					  #end
+		        ],
+		        "requisitos": [
+					  ${requisitoSelector.restart()}
+					  #foreach ($i in [1 .. $generator.randomInt(1, 5)] )
+					  	#set ($value = $requisitoSelector.nextUnique())
+					      {
+			                "tagId": ${value.id},
+			                "name": "${value.name}",
+			                "contextId": 128,
+			                "contextName": "lugar.requisito"
+					      }#if( $foreach.hasNext ), #end		            	
+					  #end
+	        ],
+		        "imageId": 24034,
+		        "imageLocation": "archives/${generator.randomFilename(10,28,3,8,ext)}-l.jpg"
+		    }
+		</http:post>
+		
+	</generate>
+	
+</module>

@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<generator xmlns="http://www.esmartpoint.com/schema/random-generator"
+	xmlns:db="http://www.esmartpoint.com/schema/db-random-generator">
+	<selector var="isDeleted">
+		<item weight="10" value="true"/>
+		<item weight="90" value="false"/>
+	</selector>
+	
+	<selector var="isActive">
+		<item weight="10" value="true"/>
+		<item weight="90" value="false"/>
+	</selector>
+
+	<selector var="browserType">
+		<item weight="30" value="'Firefox'"/>
+		<item weight="40" value="'Chrome'"/>
+		<item weight="25" value="'IE'"/>
+		<item weight="5" value="'Other'"/>
+	</selector>	
+
+	<selector var="emailDomain">
+		<item weight="10" value="'ridermove.com'"/>
+		<item weight="30" value="'hotmail.com'"/>
+		<item weight="40" value="'gmail.com'"/>
+		<item weight="5" value="'yahoo.com'"/>
+		<item weight="5" value="'aol.com'"/>
+	</selector>		
+
+	<selector var="rank">
+		<item weight="10" value="1"/>
+		<item weight="20" value="2"/>
+		<item weight="30" value="3"/>
+		<item weight="50" value="4"/>
+		<item weight="10" value="5"/>
+	</selector>
+	
+	<db:load var="entityClass">
+		select * from snm_classes where package_name='org.rider.model' and class_name='Lugar'
+	</db:load>
+	
+	<generate title="snm_lugares" 
+		var="entityList" element="data['lugar_id']" type="fixed" size="100">
+		
+		<set var="firstName" value="generator.randomFirstName()" />
+		<set var="lastName" value="generator.randomLastName()" />
+		<set var="createAt" value="generator.randomDate(new org.joda.time.DateTime(2000, 1,  1, 0, 0), new org.joda.time.DateTime(2014, 1,  1, 0, 0))" />
+		<set var="modifiedAt" value="generator.randomDate(createAt, new org.joda.time.DateTime().now())" />
+		<set var="lastLogonAt" value="generator.randomDate(createAt, modifiedAt)" />
+		
+		<set var="entity" type="java.lang.HashMap">
+			<set field="name" value="generator.randomAlphaWithSpaces(5, 64, 2, 8)" />
+			<set field="created_by" value="userSelector.getNext()" />
+			<set field="created_on" value="createAt.toDate()" />
+			<set field="entity_class_id" value="entityClass['id']" />
+			<set field="rank" value="rank.getNext()" />
+			<set field="human_url_name" value="generator.toHumanURL(entity['name'])" />
+			<set field="is_deleted" value="generator.randomBoolean(90, 10)" />
+			<set field="modified_by" value="null" />
+			<set field="modified_on" value="createAt.toDate()" />
+			
+			<set field="num_comments" value="generator.randomInt(0, 1000)" />
+			<set field="num_documents" value="generator.randomInt(0, 1000)" />
+			<set field="num_evaluations" value="generator.randomInt(0, 1000)" />
+			<set field="num_likes" value="generator.randomInt(0, 1000)" />
+			<set field="num_members" value="generator.randomInt(0, 1000)" />
+			<set field="num_posts" value="generator.randomInt(0, 1000)" />
+			<set field="num_tasks" value="generator.randomInt(0, 1000)" />
+			<set field="num_visits" value="generator.randomInt(0, 1000)" />
+		</set>
+		
+		<db:insert table="snm_entities" value="entity" key="entity_id" />
+		
+		<set var="data" type="java.lang.HashMap">
+			<set field="lugar_id" value="entity['entity_id']" />
+			<set field="description" value="generator.randomAlphaWithSpaces(16, 256, 2, 8)" />
+			<set field="is_seasonable" value="false" />
+			<set field="build_information" value="generator.randomAlphaWithSpaces(16, 128, 2, 8)" />
+			<set field="design_information" value="generator.randomAlphaWithSpaces(16, 128, 2, 8)" />
+			<set field="alternate_names" value="generator.randomAlphaWithSpaces(16, 256, 2, 8)" />
+			<set field="location" value="generator.randomAlphaWithSpaces(16, 256, 2, 8)" />
+			<set field="geo_location_x" value="generator.randomInt(0, 1000)" />
+			<set field="geo_location_y" value="generator.randomInt(0, 1000)" />
+			<set field="dimensiones" value="generator.randomInt(20, 1000)" />
+			<set field="horario" value="generator.randomAlphaWithSpaces(8, 16, 2, 8)" />
+			<set field="servicios" value="generator.randomAlphaWithSpaces(16, 256, 2, 8)" />
+			<set field="requisitos" value="generator.randomAlphaWithSpaces(16, 256, 2, 8)" />
+		</set>
+		
+		<db:insert table="lugares" value="data" />
+		
+	</generate>
+	
+	<generate title="entityList\snm_entity_albums" 
+		var="albumList" element="data['album_id']" type="child" source="entityList" parentFrecuency="parentFrecuency">
+		
+		<set var="firstName" value="generator.randomFirstName()" />
+		<set var="lastName" value="generator.randomLastName()" />
+		<set var="createAt" value="generator.randomDate(new org.joda.time.DateTime(2000, 1,  1, 0, 0), new org.joda.time.DateTime(2014, 1,  1, 0, 0))" />
+		<set var="modifiedAt" value="generator.randomDate(createAt, new org.joda.time.DateTime().now())" />
+		<set var="lastLogonAt" value="generator.randomDate(createAt, modifiedAt)" />
+		
+		<set var="entity" type="java.lang.HashMap">
+			<set field="name" value="generator.randomAlphaWithSpaces(5, 64, 2, 8)" />
+			<set field="created_by" value="null" />
+			<set field="created_on" value="createAt.toDate()" />
+			<set field="entity_class_id" value="entityClass['id']" />
+			<set field="rank" value="rank.getNext()" />
+			<set field="human_url_name" value="generator.toHumanURL(entity['name'])" />
+			<set field="is_deleted" value="generator.randomBoolean(90, 10)" />
+			<set field="modified_by" value="null" />
+			<set field="modified_on" value="createAt.toDate()" />
+			
+			<set field="num_comments" value="generator.randomInt(0, 1000)" />
+			<set field="num_documents" value="generator.randomInt(0, 1000)" />
+			<set field="num_evaluations" value="generator.randomInt(0, 1000)" />
+			<set field="num_likes" value="generator.randomInt(0, 1000)" />
+			<set field="num_members" value="generator.randomInt(0, 1000)" />
+			<set field="num_posts" value="generator.randomInt(0, 1000)" />
+			<set field="num_tasks" value="generator.randomInt(0, 1000)" />
+			<set field="num_visits" value="generator.randomInt(0, 1000)" />
+		</set>
+		
+		<db:insert table="snm_entities" value="entity" key="entity_id" />
+		
+		<set var="data" type="java.lang.HashMap">
+			<set field="entity_id" value="parent" />
+			<set field="album_id" value="entity['entity_id']" />
+		</set>
+		
+		<db:insert table="snm_entity_albums" value="data" />
+		
+	</generate>	
+	
+</generator>

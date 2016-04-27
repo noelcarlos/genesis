@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<generator xmlns="http://www.esmartpoint.com/schema/random-generator"
+	xmlns:db="http://www.esmartpoint.com/schema/db-random-generator"
+	xmlns:es="http://www.esmartpoint.com/schema/elasticsearch-random-generator">
+	
+	<selector var="isDeleted">
+		<item weight="10" value="true"/>
+		<item weight="90" value="false"/>
+	</selector>
+	
+	<selector var="isActive">
+		<item weight="10" value="true"/>
+		<item weight="90" value="false"/>
+	</selector>
+
+	<selector var="browserType">
+		<item weight="30" value="'Firefox'"/>
+		<item weight="40" value="'Chrome'"/>
+		<item weight="25" value="'IE'"/>
+		<item weight="5" value="'Other'"/>
+	</selector>	
+
+	<selector var="emailDomain">
+		<item weight="10" value="'ridermove.com'"/>
+		<item weight="30" value="'hotmail.com'"/>
+		<item weight="40" value="'gmail.com'"/>
+		<item weight="5" value="'yahoo.com'"/>
+		<item weight="5" value="'aol.com'"/>
+	</selector>		
+
+	<selector var="rank">
+		<item weight="10" value="1"/>
+		<item weight="20" value="2"/>
+		<item weight="30" value="3"/>
+		<item weight="50" value="4"/>
+		<item weight="10" value="5"/>
+	</selector>
+	
+	<db:load var="entityClass">
+		select * from snm_classes where package_name='org.snm.core' and class_name='User'
+	</db:load>
+	
+	<selector var="firstNameSelector" weightNull="0" keyValue="nombre" keyWeight="frecuencia" >
+		<sql>
+			SELECT * FROM datagen.src_nombres
+		</sql>
+	</selector>
+	
+	<selector var="lastNameSelector" weightNull="0" keyValue="apellido" keyWeight="frecuencia" >
+		<sql>
+			SELECT * FROM datagen.src_apellidos
+		</sql>
+	</selector>
+	
+	<generate title="snm_users" 
+		var="userList" element="#user['user_id']" type="fixed" size="1000">
+		
+		<set var="firstName" value="#firstNameSelector.getNext()" />
+		<set var="lastName1" value="#lastNameSelector.getNext()" />
+		<set var="lastName2" value="#lastNameSelector.getNext()" />
+		<set var="createAt" value="#generator.randomDate(new org.joda.time.DateTime(2000, 1,  1, 0, 0), new org.joda.time.DateTime(2014, 1,  1, 0, 0))" />
+		<set var="modifiedAt" value="#generator.randomDate(#createAt, new org.joda.time.DateTime().now())" />
+		<set var="lastLogonAt" value="#generator.randomDate(#createAt, #modifiedAt)" />
+		
+		<set var="entity" type="java.lang.HashMap">
+			<set field="name" value="#generator.randomAlphaWithSpaces(5, 64, 2, 8)" />
+			<set field="created_by" value="null" />
+			<set field="created_on" value="#createAt.toDate()" />
+			<set field="entity_class_id" value="#entityClass['id']" />
+			<set field="rank" value="#rank.getNext()" />
+			<set field="human_url_name" value="#generator.toHumanURL(#entity['name'])" />
+			<set field="is_deleted" value="#generator.randomBoolean(90, 10)" />
+			<set field="modified_by" value="null" />
+			<set field="modified_on" value="#createAt.toDate()" />
+			
+			<set field="num_comments" value="#generator.randomInt(0, 1000)" />
+			<set field="num_documents" value="#generator.randomInt(0, 1000)" />
+			<set field="num_evaluations" value="#generator.randomInt(0, 1000)" />
+			<set field="num_likes" value="#generator.randomInt(0, 1000)" />
+			<set field="num_members" value="#generator.randomInt(0, 1000)" />
+			<set field="num_posts" value="#generator.randomInt(0, 1000)" />
+			<set field="num_tasks" value="#generator.randomInt(0, 1000)" />
+			<set field="num_visits" value="#generator.randomInt(0, 1000)" />
+		</set>
+		
+		<db:insert table="snm_entities" value="entity" key="entity_id" />
+		
+		<set var="user" type="java.lang.HashMap">
+			<set field="user_id" value="#entity['entity_id']" />
+			<set field="first_name" value="#firstName" />
+			<set field="last_name" value="#lastName1 + ' ' + #lastName2" />
+			<set field="is_deleted" value="#generator.randomBoolean(90, 10)" />
+			<set field="is_active" value="#generator.randomBoolean(90, 10)" />
+			<set field="last_logon_at" value="#lastLogonAt.toDate()" />
+			<set field="last_logon_ip" value="#generator.randomIP()" />
+			<set field="browser_type" value="#browserType.getNext()" />
+			<set field="email" value="#firstName.toLowerCase() + '.' + #lastName1.toLowerCase() + '.' + #entity['entity_id'] + '@' + #emailDomain.getNext()" />
+			<set field="password" value="'xxxx'" />
+		</set>
+		
+		<db:insert table="snm_users" value="user" key="user_id" />
+		
+	</generate>
+	
+	<selector var="parentFrecuency">
+		<item weight="10" value="null"/>
+		<item weight="90" value="1"/>
+	</selector>
+
+	<generate title="snm_users\user_profile" 
+		type="child" source="userList" parentFrecuency="parentFrecuency">
+		
+		<set var="data" type="java.lang.HashMap">
+			<set field="user_id" value="#parent" />
+			<set field="resumen" value="#generator.randomAlphaWithSpaces(64, 512, 2, 8)" />
+			<set field="presentacion_personal" value="#generator.randomAlphaWithSpaces(8, 50, 2, 8)" />
+			<set field="actionbar_background_color" value="#generator.randomHexNumeric(6)" />
+		</set> 
+		
+		<db:insert table="user_profile" value="data" />
+		
+	</generate>
+	
+	<selector var="fileExtension">
+		<item weight="75" value="'jpg'"/>
+		<item weight="20" value="'png'"/>
+		<item weight="5" value="'bmp'"/>
+	</selector>
+	
+	<generate title="snm_users\snm_archives" 
+		type="child" source="userList" parentFrecuency="parentFrecuency">
+		
+		<set var="createAt" value="#generator.randomDate(new org.joda.time.DateTime(2000, 1,  1, 0, 0), new org.joda.time.DateTime(2014, 1,  1, 0, 0))" />
+		<set var="ext" value="#fileExtension.getNext()" />
+		<set var="fileName" value="#generator.randomAlpha(4,64).toLowerCase() + '.' + #ext" />
+		
+		<set var="data" type="java.lang.HashMap">
+			<set field="created_by_id" value="#parent" />
+			<set field="created_at" value="#createAt.toDate()" />
+			<set field="deleted_by_id" value="null" />
+			<set field="deleted_at" value="null" />
+			<set field="crop_x1" value="0" />
+			<set field="crop_y1" value="0" />
+			<set field="crop_x2" value="#generator.randomNumberWithStep(50, 250, 25)" />
+			<set field="crop_y2" value="#generator.randomNumberWithStep(50, 250, 25)" />
+			<set field="file_size" value="#generator.randomNumberWithStep(1024, 1024*100000, 1024)" />
+			<set field="width" value="#generator.randomNumberWithStep(50, 250, 25)" />
+			<set field="height" value="#generator.randomNumberWithStep(50, 250, 25)" />
+				
+			<set field="location" value="#fileName" />
+			<set field="name" value="#fileName" />
+			<set field="original" value="#fileName" />
+			<set field="type" value="#ext" />
+		</set> 
+		
+		<db:insert table="snm_archives" value="data" />
+		
+	</generate>
+	
+	<selector var="rol">
+		<item weight="10" value="2"/>
+		<item weight="1000" value="3"/>
+	</selector>
+	
+	<generate title="snm_users\snm_user_roles" 
+		type="child" source="userList" parentFrecuency="parentFrecuency">
+		
+		<set var="createAt" value="#generator.randomDate(new org.joda.time.DateTime(2000, 1,  1, 0, 0), new org.joda.time.DateTime(2014, 1,  1, 0, 0))" />
+		
+		<set var="data" type="java.lang.HashMap">
+			<set field="user_id" value="#parent" />
+			<set field="start_date" value="#createAt.toDate()" />
+			<set field="role_id" value="#rol.getNext()" />
+			<set field="is_current" value="true" />
+		</set> 
+		
+		<db:insert table="snm_user_roles" value="data" />
+		
+	</generate>
+	
+	<selector var="parentFrecuency">
+		<item weight="20" value="null"/>
+		<item weight="80" from="1" to="5"/>
+		<item weight="30" from="6" to="10"/>
+		<item weight="3" from="10" to="50"/>
+	</selector>
+	
+	<db:load var="entityClass">
+		select * from snm_classes where package_name='org.snm.core' and class_name='Album'
+	</db:load>
+	
+	<generate title="snm_users\snm_entity_albums" 
+		var="albumList" element="#data['album_id']" type="child" source="userList" parentFrecuency="parentFrecuency">
+		
+		<set var="firstName" value="#generator.randomFirstName()" />
+		<set var="lastName" value="#generator.randomLastName()" />
+		<set var="createAt" value="#generator.randomDate(new org.joda.time.DateTime(2000, 1,  1, 0, 0), new org.joda.time.DateTime(2014, 1,  1, 0, 0))" />
+		<set var="modifiedAt" value="#generator.randomDate(#createAt, new org.joda.time.DateTime().now())" />
+		<set var="lastLogonAt" value="#generator.randomDate(#createAt, #modifiedAt)" />
+		
+		<set var="entity" type="java.lang.HashMap">
+			<set field="name" value="#generator.randomAlphaWithSpaces(5, 64, 2, 8)" />
+			<set field="created_by" value="null" />
+			<set field="created_on" value="#createAt.toDate()" />
+			<set field="entity_class_id" value="#entityClass['id']" />
+			<set field="rank" value="#rank.getNext()" />
+			<set field="human_url_name" value="#generator.toHumanURL(#entity['name'])" />
+			<set field="is_deleted" value="#generator.randomBoolean(90, 10)" />
+			<set field="modified_by" value="null" />
+			<set field="modified_on" value="#createAt.toDate()" />
+			
+			<set field="num_comments" value="#generator.randomInt(0, 1000)" />
+			<set field="num_documents" value="#generator.randomInt(0, 1000)" />
+			<set field="num_evaluations" value="#generator.randomInt(0, 1000)" />
+			<set field="num_likes" value="#generator.randomInt(0, 1000)" />
+			<set field="num_members" value="#generator.randomInt(0, 1000)" />
+			<set field="num_posts" value="#generator.randomInt(0, 1000)" />
+			<set field="num_tasks" value="#generator.randomInt(0, 1000)" />
+			<set field="num_visits" value="#generator.randomInt(0, 1000)" />
+		</set>
+		
+		<db:insert table="snm_entities" value="entity" key="entity_id" />
+		
+		<set var="data" type="java.lang.HashMap">
+			<set field="entity_id" value="#parent" />
+			<set field="album_id" value="#entity['entity_id']" />
+		</set>
+		
+		<db:insert table="snm_entity_albums" value="data" />
+		
+	</generate>
+	
+	<selector var="userSelector" items="userList" weightNull="0" weightValue="90" />
+
+	<generate title="snm_users\snm_entity_followers" 
+		type="child" source="userList" parentFrecuency="parentFrecuency">
+		
+		<set var="createAt" value="#generator.randomDate(new org.joda.time.DateTime(2000, 1,  1, 0, 0), new org.joda.time.DateTime(2014, 1,  1, 0, 0))" />
+		
+		<set var="data" type="java.lang.HashMap">
+			<set field="entity_id" value="#parent" />
+			<set field="follower_id" value="#userSelector.getNext()" />		
+			<set field="start_date" value="#createAt.toDate()" />
+			<set field="is_current" value="true" />
+		</set> 
+		
+		<db:insert table="snm_entity_followers" value="data" />
+		
+	</generate>
+	
+</generator>

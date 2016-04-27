@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<generator xmlns="http://www.esmartpoint.com/schema/random-generator"
+	xmlns:db="http://www.esmartpoint.com/schema/db-random-generator">
+	
+	<db:script>
+		delete from snm_activities where user is null;
+		delete from snm_activities where user = 'noel@gmail.com';
+		delete from snm_activities where user = 'nhernandez@esmartpoint.com';
+	</db:script>
+	
+</generator>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<generator xmlns="http://www.esmartpoint.com/schema/random-generator"
+	xmlns:db="http://www.esmartpoint.com/schema/db-random-generator">
+	
+	<selector var="mailFrecuency">
+		<item weight="5" value="null"/>
+		<item weight="40" value="20"/>
+		<item weight="20" value="50"/>
+		<item weight="5" value="100"/>
+	</selector>
+	
+	<generate title="snm_messages" 
+		element="#data['id']" type="child" source="userList" parentFrecuency="mailFrecuency" >
+		
+		<set var="createAt" value="#generator.randomDate(new org.joda.time.DateTime(2000, 1,  1, 0, 0), new org.joda.time.DateTime(2014, 1,  1, 0, 0))" />
+		
+		<set var="data" type="java.lang.HashMap">
+			<set field="user_id" value="#parent" />		
+			<set field="from_id" value="#userSelector.getNext()" />
+			
+			<set field="subject" value="#generator.randomAlphaWithSpaces(5, 64, 2, 8)" />
+			<set field="body" value="#generator.randomAlphaWithSpaces(128, 512, 2, 8)" />
+			<set field="create_at" value="#createAt.toDate()" />
+			
+			<set field="is_outbox" value="#generator.randomBoolean(90, 10)" />
+			<set field="is_inbox" value="#generator.randomBoolean(90, 10)" />
+			<set field="is_deleted" value="#generator.randomBoolean(90, 10)" />	
+			<set field="is_notification" value="#generator.randomBoolean(90, 10)" />
+			<set field="is_urgent" value="#generator.randomBoolean(90, 10)" />
+		</set> 
+		
+		<db:insert table="snm_messages" value="data" key="id" />
+		
+	</generate>
+	
+</generator>

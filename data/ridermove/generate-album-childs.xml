@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<generator xmlns="http://www.esmartpoint.com/schema/random-generator"
+	xmlns:db="http://www.esmartpoint.com/schema/db-random-generator">
+	
+	<generate name="snm_entity_likes" title="snm_entities\snm_entity_albums\snm_entity_likes" 
+		type="child" source="albumList" parentFrecuency="parentFrecuency">
+		
+		<set var="createAt" value="#generator.randomDate(new org.joda.time.DateTime(2000, 1,  1, 0, 0), new org.joda.time.DateTime(2014, 1,  1, 0, 0))" />
+		
+		<set var="data" type="java.lang.HashMap">
+			<set field="entity_id" value="#parent" />
+			<set field="user_id" value="#userSelector.getNext()" />
+			<set field="start_date" value="#createAt.toDate()" />
+			<set field="is_current" value="true" />
+		</set>
+		
+		<db:insert table="snm_entity_likes" value="data" />
+		
+	</generate>
+	
+	<generate title="*\snm_entity_albums\snm_entity_comments" 
+		var="albumCommentList" element="#data['comment_id']" type="child" source="albumList" parentFrecuency="parentFrecuency">
+		
+		<set var="firstName" value="#generator.randomFirstName()" />
+		<set var="lastName" value="#generator.randomLastName()" />
+		<set var="createAt" value="#generator.randomDate(new org.joda.time.DateTime(2000, 1,  1, 0, 0), new org.joda.time.DateTime(2014, 1,  1, 0, 0))" />
+		<set var="modifiedAt" value="#generator.randomDate(#createAt, new org.joda.time.DateTime().now())" />
+		<set var="lastLogonAt" value="#generator.randomDate(#createAt, #modifiedAt)" />
+		
+		<set var="entity" type="java.lang.HashMap">
+			<set field="name" value="#generator.randomAlphaWithSpaces(5, 64, 2, 8)" />
+			<set field="created_by" value="#userSelector.getNext()" />
+			<set field="created_on" value="#createAt.toDate()" />
+			<set field="entity_class_id" value="#entityClass['id']" />
+			<set field="rank" value="#rank.getNext()" />
+			<set field="human_url_name" value="#generator.toHumanURL(#entity['name'])" />
+			<set field="is_deleted" value="#generator.randomBoolean(90, 10)" />
+			<set field="modified_by" value="null" />
+			<set field="modified_on" value="#createAt.toDate()" />
+			
+			<set field="num_comments" value="#generator.randomInt(0, 1000)" />
+			<set field="num_documents" value="#generator.randomInt(0, 1000)" />
+			<set field="num_evaluations" value="#generator.randomInt(0, 1000)" />
+			<set field="num_likes" value="#generator.randomInt(0, 1000)" />
+			<set field="num_members" value="#generator.randomInt(0, 1000)" />
+			<set field="num_posts" value="#generator.randomInt(0, 1000)" />
+			<set field="num_tasks" value="#generator.randomInt(0, 1000)" />
+			<set field="num_visits" value="#generator.randomInt(0, 1000)" />
+		</set>
+		
+		<db:insert table="snm_entities" value="entity" key="entity_id" />
+		
+		<set var="data" type="java.lang.HashMap">
+			<set field="comment_id" value="#entity['entity_id']" />
+			<set field="entity_id" value="#parent" />
+			<set field="start_date" value="#createAt.toDate()" />
+			<set field="is_current" value="true" />
+			<set field="text" value="#generator.randomAlphaWithSpaces(64, 512, 2, 8)" />
+		</set>
+		
+		<db:insert table="snm_entity_comments" value="data" />
+		
+	</generate>
+	
+	<call name="snm_entity_likes" title="snm_entities\snm_entity_albums\snm_album_comments\snm_entity_likes" source="albumCommentList" />	
+	
+	<generate title="snm_entities\snm_entity_albums\snm_album_items" 
+		var="albumItemsList" element="#data['album_item_id']" type="child" source="albumList" parentFrecuency="parentFrecuency">
+		
+		<set var="firstName" value="#generator.randomFirstName()" />
+		<set var="lastName" value="#generator.randomLastName()" />
+		<set var="createAt" value="#generator.randomDate(new org.joda.time.DateTime(2000, 1,  1, 0, 0), new org.joda.time.DateTime(2014, 1,  1, 0, 0))" />
+		<set var="modifiedAt" value="#generator.randomDate(#createAt, new org.joda.time.DateTime().now())" />
+		<set var="lastLogonAt" value="#generator.randomDate(#createAt, #modifiedAt)" />
+		
+		<set var="entity" type="java.lang.HashMap">
+			<set field="name" value="#generator.randomAlphaWithSpaces(5, 64, 2, 8)" />
+			<set field="created_by" value="#userSelector.getNext()" />
+			<set field="created_on" value="#createAt.toDate()" />
+			<set field="entity_class_id" value="#entityClass['id']" />
+			<set field="rank" value="#rank.getNext()" />
+			<set field="human_url_name" value="#generator.toHumanURL(#entity['name'])" />
+			<set field="is_deleted" value="#generator.randomBoolean(90, 10)" />
+			<set field="modified_by" value="null" />
+			<set field="modified_on" value="#createAt.toDate()" />
+			
+			<set field="num_comments" value="#generator.randomInt(0, 1000)" />
+			<set field="num_documents" value="#generator.randomInt(0, 1000)" />
+			<set field="num_evaluations" value="#generator.randomInt(0, 1000)" />
+			<set field="num_likes" value="#generator.randomInt(0, 1000)" />
+			<set field="num_members" value="#generator.randomInt(0, 1000)" />
+			<set field="num_posts" value="#generator.randomInt(0, 1000)" />
+			<set field="num_tasks" value="#generator.randomInt(0, 1000)" />
+			<set field="num_visits" value="#generator.randomInt(0, 1000)" />
+		</set>
+		
+		<db:insert table="snm_entities" value="entity" key="entity_id" />
+		
+		<set var="ext" value="#fileExtension.getNext()" />
+		<set var="fileName" value="#generator.randomAlpha(4,64).toLowerCase() + '.' + #ext" />
+		
+		<set var="archive" type="java.lang.HashMap">
+			<set field="created_by_id" value="#userSelector.getNext()" />
+			<set field="created_at" value="#createAt.toDate()" />
+			<set field="deleted_by_id" value="null" />
+			<set field="deleted_at" value="null" />
+			<set field="crop_x1" value="0" />
+			<set field="crop_y1" value="0" />
+			<set field="crop_x2" value="#generator.randomNumberWithStep(50, 250, 25)" />
+			<set field="crop_y2" value="#generator.randomNumberWithStep(50, 250, 25)" />
+			<set field="file_size" value="#generator.randomNumberWithStep(1024, 1024*100000, 1024)" />
+			<set field="width" value="#generator.randomNumberWithStep(50, 250, 25)" />
+			<set field="height" value="#generator.randomNumberWithStep(50, 250, 25)" />
+				
+			<set field="location" value="#fileName" />
+			<set field="name" value="#fileName" />
+			<set field="original" value="#fileName" />
+			<set field="type" value="#ext" />
+		</set> 
+		
+		<db:insert table="snm_archives" value="archive" key="id" />		
+		
+		<set var="data" type="java.lang.HashMap">
+			<set field="album_item_id" value="#entity['entity_id']" />
+			<set field="album_id" value="#parent" />
+			<set field="archive_id" value="#archive['id']" />
+		</set>
+		
+		<db:insert table="snm_entity_album_items" value="data" />
+		
+	</generate>
+	
+	<call name="snm_entity_likes" title="*\snm_entity_albums\snm_album_items\snm_entity_likes" source="albumItemsList" />
+	
+	<generate title="*\snm_entity_albums\snm_album_items\snm_entity_comments"
+		var="albumItemsCommentList" element="#data['comment_id']" type="child" source="albumItemsList" parentFrecuency="parentFrecuency">
+		<set var="firstName" value="#generator.randomFirstName()" />
+		<set var="lastName" value="#generator.randomLastName()" />
+		<set var="createAt" value="#generator.randomDate(new org.joda.time.DateTime(2000, 1,  1, 0, 0), new org.joda.time.DateTime(2014, 1,  1, 0, 0))" />
+		<set var="modifiedAt" value="#generator.randomDate(#createAt, new org.joda.time.DateTime().now())" />
+		<set var="lastLogonAt" value="#generator.randomDate(#createAt, #modifiedAt)" />
+		
+		<set var="entity" type="java.lang.HashMap">
+			<set field="name" value="#generator.randomAlphaWithSpaces(5, 64, 2, 8)" />
+			<set field="created_by" value="#userSelector.getNext()" />
+			<set field="created_on" value="#createAt.toDate()" />
+			<set field="entity_class_id" value="#entityClass['id']" />
+			<set field="rank" value="#rank.getNext()" />
+			<set field="human_url_name" value="#generator.toHumanURL(#entity['name'])" />
+			<set field="is_deleted" value="#generator.randomBoolean(90, 10)" />
+			<set field="modified_by" value="null" />
+			<set field="modified_on" value="#createAt.toDate()" />
+			
+			<set field="num_comments" value="#generator.randomInt(0, 1000)" />
+			<set field="num_documents" value="#generator.randomInt(0, 1000)" />
+			<set field="num_evaluations" value="#generator.randomInt(0, 1000)" />
+			<set field="num_likes" value="#generator.randomInt(0, 1000)" />
+			<set field="num_members" value="#generator.randomInt(0, 1000)" />
+			<set field="num_posts" value="#generator.randomInt(0, 1000)" />
+			<set field="num_tasks" value="#generator.randomInt(0, 1000)" />
+			<set field="num_visits" value="#generator.randomInt(0, 1000)" />
+		</set>
+		
+		<db:insert table="snm_entities" value="entity" key="entity_id" />
+		
+		<set var="data" type="java.lang.HashMap">
+			<set field="comment_id" value="#entity['entity_id']" />
+			<set field="entity_id" value="#parent" />
+			<set field="start_date" value="#createAt.toDate()" />
+			<set field="is_current" value="true" />
+			<set field="text" value="#generator.randomAlphaWithSpaces(64, 512, 2, 8)" />
+		</set>
+		
+		<db:insert table="snm_entity_comments" value="data" />
+		
+	</generate>
+	
+	<call name="snm_entity_likes" title="*\snm_entity_albums\snm_album_items\snm_album_comments\snm_entity_likes" source="albumItemsCommentList" />
+	
+</generator>

@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module xmlns="http://www.esmartpoint.com/schema/random-generator"
+	xmlns:db="http://www.esmartpoint.com/schema/db-random-generator"
+	xmlns:logic="http://www.esmartpoint.com/schema/logic-random-generator"
+	xmlns:mongodb="http://www.esmartpoint.com/schema/genesis/mongodb">
+	
+	<input name="userCount"/>
+	<output name="userList" />
+	<output name="userSelector" />
+	
+	<selector var="isDeleted">
+		<item weight="10" value="true"/>
+		<item weight="90" value="false"/>
+	</selector>
+	
+	<selector var="isActive">
+		<item weight="10" value="true"/>
+		<item weight="90" value="false"/>
+	</selector>
+
+	<selector var="browserType">
+		<item weight="30" value="'Firefox'"/>
+		<item weight="40" value="'Chrome'"/>
+		<item weight="25" value="'IE'"/>
+		<item weight="5" value="'Other'"/>
+	</selector>	
+
+	<selector var="emailDomain">
+		<item weight="10" value="'ridermove.com'"/>
+		<item weight="30" value="'hotmail.com'"/>
+		<item weight="40" value="'gmail.com'"/>
+		<item weight="5" value="'yahoo.com'"/>
+		<item weight="5" value="'aol.com'"/>
+	</selector>		
+
+	<selector var="rank">
+		<item weight="10" value="1"/>
+		<item weight="20" value="2"/>
+		<item weight="30" value="3"/>
+		<item weight="50" value="4"/>
+		<item weight="10" value="5"/>
+	</selector>
+	
+	<db:load var="entityClass">
+		select * from snm_classes where package_name='org.snm.core' and class_name='User'
+	</db:load>
+	
+	<selector var="firstNameSelector" weightNull="0" keyValue="nombre" keyWeight="frecuencia" >
+		<sql>
+			SELECT * FROM datagen.src_nombres
+		</sql>
+	</selector>
+	
+	<selector var="lastNameSelector" weightNull="0" keyValue="apellido" keyWeight="frecuencia" >
+		<sql>
+			SELECT * FROM datagen.src_apellidos
+		</sql>
+	</selector>
+	
+	<selector var="deporteSelector" weightNull="0" weightValue="100" >
+		<sql>SELECT t.* FROM snm_categories t INNER JOIN snm_contexts c ON t.context_id = c.context_id WHERE c.name = 'deporte'</sql>
+	</selector>	
+
+	<selector var="tagSelector" weightNull="0" weightValue="100" >
+		<sql>SELECT t.* FROM snm_tags t INNER JOIN snm_contexts c ON t.context_id = c.context_id WHERE c.name = 'lugar.tag'</sql>
+	</selector>
+	
+	<selector var="ciudadSelector" weightNull="0" weightValue="100" >
+		<sql>SELECT t.* FROM snm_categories t INNER JOIN snm_contexts c ON t.context_id = c.context_id WHERE c.name = 'ciudad'</sql>
+	</selector>
+	
+	<selector var="servicioSelector" weightNull="0" weightValue="100" >
+		<sql>SELECT t.* FROM snm_tags t INNER JOIN snm_contexts c ON t.context_id = c.context_id WHERE c.name = 'lugar.servicio'</sql>
+	</selector>	
+	
+	<selector var="requisitoSelector" weightNull="0" weightValue="100" >
+		<sql>SELECT t.* FROM snm_tags t INNER JOIN snm_contexts c ON t.context_id = c.context_id WHERE c.name = 'lugar.requisito'</sql>
+	</selector>	
+	
+	<def var="entity" type="HashMap" />
+	<def var="user" type="HashMap" />
+	
+	<generate title="snm_users" var="userList" element="globals.secuences.snm_entities" type="fixed" size="userCount">
+		<set var="secuences" field="snm_entities" value="globals.secuences.snm_entities + 1" scope="global" />
+		
+		<set var="firstName" value="firstNameSelector.getNext()" />
+		<set var="lastName1" value="lastNameSelector.getNext()" />
+		<set var="lastName2" value="lastNameSelector.getNext()" />
+		<set var="createAt" value="generator.randomDate(new org.joda.time.DateTime(2000, 1,  1, 0, 0), new org.joda.time.DateTime(2014, 1,  1, 0, 0))" />
+		<set var="modifiedAt" value="generator.randomDate(createAt, new org.joda.time.DateTime().now())" />
+		<set var="lastLogonAt" value="generator.randomDate(createAt, modifiedAt)" />
+		
+		<set var="entity" type="JSONObject" >
+			<field name="name" value="firstName + ' ' + lastName1 + ' ' + lastName2" />
+			<field name="created_by" value="null" />
+			<field name="created_on" value="createAt.toDate()" />
+			<field name="entity_class_id" value="entityClass.id" />
+			<field name="rank" value="rank.getNext()" />
+			<field name="human_url_name" value="generator.toHumanURL(entity.name, 128)" />
+			<field name="is_deleted" value="generator.randomBoolean(90, 10)" />
+			<field name="modified_by" value="null" />
+			<field name="modified_on" value="createAt.toDate()" />
+			
+			<field name="num_comments" value="generator.randomInt(0, 1000)" />
+			<field name="num_documents" value="generator.randomInt(0, 1000)" />
+			<field name="num_evaluations" value="generator.randomInt(0, 1000)" />
+			<field name="num_likes" value="generator.randomInt(0, 1000)" />
+			<field name="num_nolikes" value="generator.randomInt(0, 1000)" />
+			<field name="num_members" value="generator.randomInt(0, 1000)" />
+			<field name="num_posts" value="generator.randomInt(0, 1000)" />
+			<field name="num_tasks" value="generator.randomInt(0, 1000)" />
+			<field name="num_visits" value="generator.randomInt(0, 1000)" />
+			<field name="num_notes" value="generator.randomInt(0, 1000)" />
+			<field name="num_followers" value="generator.randomInt(0, 1000)" />
+			<field name="num_questions" value="generator.randomInt(0, 1000)" />
+			<field name="num_suggests" value="generator.randomInt(0, 1000)" />			
+		</set>
+		
+		<def var="array" type="JSONArray" />
+		<script>${deporteSelector.restart()}</script>
+		<logic:for var="j" from="0" to="generator.randomInt(1, 5)">
+		  	<set var="value" value="deporteSelector.nextUnique()" />
+			<set var="item" type="JSONObject">
+				<field name="categoryId" value="value.category_id" />
+				<field name="name" value="value.name" />
+				<field name="contextId" value="104" />
+				<field name="contextName" value="'deporte'" />	
+			</set>
+			<script>${array.put(item)}</script>
+		</logic:for>
+		<script>${entity.put('categories', array)}</script>
+		
+		<def var="array" type="JSONArray" />
+		<script>${tagSelector.restart()}</script>
+		<logic:for var="j" from="0" to="generator.randomInt(1, 5)-1">
+		  	<set var="value" value="tagSelector.nextUnique()" />
+			<set var="item" type="JSONObject">
+				<field name="tagId" value="value.id" />
+				<field name="name" value="value.name" />
+				<field name="contextId" value="130" />
+				<field name="contextName" value="'lugar.tag'" />	
+			</set>
+			<script>${array.put(item)}</script>
+		</logic:for>
+		<script>${entity.put('tags', array)}</script>
+		 
+		<set var="user" type="JSONObject" >
+			<field name="entity" value="entity" />
+			<field name="first_name" value="firstName" />
+			<field name="last_name" value="lastName1 + ' ' + lastName2" />
+			<field name="is_deleted" value="generator.randomBoolean(90, 10)" />
+			<field name="is_active" value="generator.randomBoolean(10, 90)" />
+			<field name="last_logon_at" value="lastLogonAt.toDate()" />
+			<field name="last_logon_ip" value="generator.randomIP()" />
+			<field name="browser_type" value="browserType.getNext()" />
+			<field name="email" value="generator.createUsername(firstName, lastName1, globals.secuences.snm_entities) + '@' + emailDomain.getNext()" />
+			<field name="password" value="'secret'" />
+			<field name="created_on" value="createAt.toDate()" />
+			<field name="modified_on" value="createAt.toDate()" />
+		</set>
+		
+		<def var="array" type="JSONArray" />
+		<script>${servicioSelector.restart()}</script>
+		<logic:for var="j" from="0" to="generator.randomInt(1, 5)-1">
+		  	<set var="value" value="servicioSelector.nextUnique()" />
+			<set var="item" type="JSONObject">
+				<field name="tagId" value="value.id" />
+				<field name="name" value="value.name" />
+				<field name="contextId" value="127" />
+				<field name="contextName" value="'lugar.servicio'" />	
+			</set>
+			<script>${array.put(item)}</script>
+		</logic:for>
+		<script>${user.put('servicios', array)}</script>
+		
+		<def var="array" type="JSONArray" />
+		<script>${requisitoSelector.restart()}</script>
+		<logic:for var="j" from="0" to="generator.randomInt(1, 5)-1">
+		  	<set var="value" value="requisitoSelector.nextUnique()" />
+			<set var="item" type="JSONObject">
+				<field name="tagId" value="value.id" />
+				<field name="name" value="value.name" />
+				<field name="contextId" value="128" />
+				<field name="contextName" value="'lugar.requisito'" />	
+			</set>
+			<script>${array.put(item)}</script>
+		</logic:for>
+		<script>${user.put('requisitos', array)}</script>		
+		
+		<mongodb:insert collection="users" data="user" />
+		
+	</generate>
+	
+</module>

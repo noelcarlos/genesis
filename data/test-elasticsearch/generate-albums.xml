@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module xmlns="http://www.esmartpoint.com/schema/random-generator"
+	xmlns:db="http://www.esmartpoint.com/schema/db-random-generator">
+	
+	<input name="entityList"/>
+	<input name="userSelector" />
+	
+	<db:load var="entityClass">
+		select * from snm_classes where package_name='org.snm.core' and class_name='Album'
+	</db:load>
+	
+	<selector var="parentFrecuency">
+		<item weight="20" value="null"/>
+		<item weight="80" from="1" to="5"/>
+		<item weight="30" from="6" to="10"/>
+		<item weight="3" from="10" to="50"/>
+	</selector>
+	
+	<selector var="rank">
+		<item weight="10" value="1"/>
+		<item weight="20" value="2"/>
+		<item weight="30" value="3"/>
+		<item weight="50" value="4"/>
+		<item weight="10" value="5"/>
+	</selector>
+	
+	<selector var="fileExtension">
+		<item weight="75" value="'jpg'"/>
+		<item weight="20" value="'png'"/>
+		<item weight="5" value="'bmp'"/>
+	</selector>
+	
+	<generate title="snm_entities\snm_entity_albums" 
+		var="albumList" element="globals.secuences.snm_entities" type="child" source="entityList" parentFrecuency="parentFrecuency">
+		<set var="secuences" field="snm_entities" value="globals.secuences.snm_entities + 1" scope="global" />
+		
+		<set var="firstName" value="generator.randomFirstName()" />
+		<set var="lastName" value="generator.randomLastName()" />
+		<set var="createAt" value="generator.randomDate(new org.joda.time.DateTime(2000, 1,  1, 0, 0), new org.joda.time.DateTime(2014, 1,  1, 0, 0))" />
+		<set var="modifiedAt" value="generator.randomDate(createAt, new org.joda.time.DateTime().now())" />
+		<set var="lastLogonAt" value="generator.randomDate(createAt, modifiedAt)" />
+		
+		<set var="entity" type="java.util.HashMap">
+			<field name="entity_id" value="globals.secuences.snm_entities" />
+			<field name="name" value="generator.randomTitle(10, 64, 2, 8)" />
+			<field name="created_by" value="null" />
+			<field name="created_on" value="createAt.toDate()" />
+			<field name="entity_class_id" value="entityClass.id" />
+			<field name="rank" value="rank.getNext()" />
+			<field name="human_url_name" value="generator.toHumanURL(entity.name, 128)" />
+			<field name="is_deleted" value="generator.randomBoolean(90, 10)" />
+			<field name="modified_by" value="null" />
+			<field name="modified_on" value="createAt.toDate()" />
+			
+			<field name="num_comments" value="generator.randomInt(0, 1000)" />
+			<field name="num_documents" value="generator.randomInt(0, 1000)" />
+			<field name="num_evaluations" value="generator.randomInt(0, 1000)" />
+			<field name="num_likes" value="generator.randomInt(0, 1000)" />
+			<field name="num_nolikes" value="generator.randomInt(0, 1000)" />
+			<field name="num_members" value="generator.randomInt(0, 1000)" />
+			<field name="num_posts" value="generator.randomInt(0, 1000)" />
+			<field name="num_tasks" value="generator.randomInt(0, 1000)" />
+			<field name="num_visits" value="generator.randomInt(0, 1000)" />
+			<field name="num_notes" value="generator.randomInt(0, 1000)" />
+			<field name="num_followers" value="generator.randomInt(0, 1000)" />
+			<field name="num_questions" value="generator.randomInt(0, 1000)" />
+			<field name="num_suggests" value="generator.randomInt(0, 1000)" />
+		</set>
+		
+		<db:insert table="snm_entities" value="entity" />
+		
+		<set var="data" type="java.util.HashMap">
+			<field name="entity_id" value="parent" />
+			<field name="album_id" value="entity.entity_id" />
+		</set>
+		
+		<db:insert table="snm_entity_albums" value="data" />
+		
+	</generate>
+	
+	<execute file="generate-likes.xml">
+		<input name="entityList" value="albumList" />
+		<input name="userSelector" />
+	</execute>
+	
+	<execute file="generate-comments.xml">
+		<input name="entityList" value="albumList" />
+		<input name="userSelector" />
+	</execute>
+	
+	<selector var="parentFrecuency">
+		<item weight="5" value="null"/>
+		<item weight="80" from="1" to="5"/>
+		<item weight="10" from="6" to="10"/>
+		<item weight="3" from="10" to="50"/>
+	</selector>	
+
+	<generate title="snm_entities\snm_entity_albums\snm_album_items" 
+		var="albumItemsList" element="globals.secuences.snm_entities" type="child" source="albumList" parentFrecuency="parentFrecuency">
+		<set var="secuences" field="snm_entities" value="globals.secuences.snm_entities + 1" scope="global" />
+		
+		<set var="firstName" value="generator.randomFirstName()" />
+		<set var="lastName" value="generator.randomLastName()" />
+		<set var="createAt" value="generator.randomDate(new org.joda.time.DateTime(2000, 1,  1, 0, 0), new org.joda.time.DateTime(2014, 1,  1, 0, 0))" />
+		<set var="modifiedAt" value="generator.randomDate(createAt, new org.joda.time.DateTime().now())" />
+		<set var="lastLogonAt" value="generator.randomDate(createAt, modifiedAt)" />
+		
+		<set var="entity" type="java.util.HashMap">
+			<field name="entity_id" value="globals.secuences.snm_entities" />
+			<field name="name" value="generator.randomTitle(10, 64, 2, 8)" />
+			<field name="created_by" value="userSelector.getNext()" />
+			<field name="created_on" value="createAt.toDate()" />
+			<field name="entity_class_id" value="entityClass['id']" />
+			<field name="rank" value="rank.getNext()" />
+			<field name="human_url_name" value="generator.toHumanURL(entity.name, 128)" />
+			<field name="is_deleted" value="generator.randomBoolean(90, 10)" />
+			<field name="modified_by" value="null" />
+			<field name="modified_on" value="createAt.toDate()" />
+			
+			<field name="num_comments" value="generator.randomInt(0, 1000)" />
+			<field name="num_documents" value="generator.randomInt(0, 1000)" />
+			<field name="num_evaluations" value="generator.randomInt(0, 1000)" />
+			<field name="num_likes" value="generator.randomInt(0, 1000)" />
+			<field name="num_nolikes" value="generator.randomInt(0, 1000)" />
+			<field name="num_members" value="generator.randomInt(0, 1000)" />
+			<field name="num_posts" value="generator.randomInt(0, 1000)" />
+			<field name="num_tasks" value="generator.randomInt(0, 1000)" />
+			<field name="num_visits" value="generator.randomInt(0, 1000)" />
+			<field name="num_notes" value="generator.randomInt(0, 1000)" />
+			<field name="num_followers" value="generator.randomInt(0, 1000)" />
+			<field name="num_questions" value="generator.randomInt(0, 1000)" />
+			<field name="num_suggests" value="generator.randomInt(0, 1000)" />
+		</set>
+		
+		<db:insert table="snm_entities" value="entity" key="entity_id" />
+		
+		<set var="ext" value="fileExtension.getNext()" />
+		<set var="fileName" value="generator.randomFilename(10,28,3,8,ext)" />
+		
+		<set var="secuences" field="snm_archives" value="globals.secuences.snm_archives + 1" scope="global"/>
+		
+		<set var="archive" type="java.util.HashMap">
+			<field name="id" value="globals.secuences.snm_archives" />
+			<field name="created_by_id" value="userSelector.getNext()" />
+			<field name="created_at" value="createAt.toDate()" />
+			<field name="deleted_by_id" value="null" />
+			<field name="deleted_at" value="null" />
+			<field name="crop_x1" value="0" />
+			<field name="crop_y1" value="0" />
+			<field name="crop_x2" value="generator.randomNumberWithStep(50, 250, 25)" />
+			<field name="crop_y2" value="generator.randomNumberWithStep(50, 250, 25)" />
+			<field name="file_size" value="generator.randomNumberWithStep(1024, 1024*100000, 1024)" />
+			<field name="width" value="generator.randomNumberWithStep(50, 250, 25)" />
+			<field name="height" value="generator.randomNumberWithStep(50, 250, 25)" />
+				
+			<field name="location" value="fileName" />
+			<field name="name" value="fileName" />
+			<field name="original" value="fileName" />
+			<field name="type" value="ext" />
+		</set> 
+		
+		<db:insert table="snm_archives" value="archive" key="id" />		
+		
+		<set var="data" type="java.util.HashMap">
+			<field name="album_item_id" value="globals.secuences.snm_entities" />
+			<field name="album_id" value="parent" />
+			<field name="archive_id" value="globals.secuences.snm_archives" />
+		</set>
+		
+		<db:insert table="snm_entity_album_items" value="data" />
+		
+	</generate>
+	
+	<execute file="generate-likes.xml">
+		<input name="entityList" value="albumItemsList" />
+		<input name="userSelector" />
+	</execute>
+	
+	<execute file="generate-comments.xml">
+		<input name="entityList" value="albumItemsList" />
+		<input name="userSelector" />
+	</execute>
+		
+</module>

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<generator xmlns="http://www.esmartpoint.com/schema/random-generator"
+	xmlns:db="http://www.esmartpoint.com/schema/db-random-generator">
+
+	<import file="initialize.xml" />
+	 
+	<db:list var="parentList">
+		select * from lugares
+	</db:list>	
+	
+	<selector var="tagSelector" weightNull="0" weightValue="100" >
+		<sql>SELECT t.id FROM snm_tags t INNER JOIN snm_contexts c ON t.context_id = c.context_id WHERE c.name = 'lugar.servicio'</sql>
+	</selector>
+	
+	<selector var="parentFrecuency">
+		<item weight="0" value="null"/>
+		<item weight="80" from="1" to="5"/>
+		<item weight="30" from="6" to="10"/>
+	</selector>
+	
+	<generate name="tags" title="snm_entities\snm_entity_tags\servicios" 
+		type="child" source="parentList" parentFrecuency="parentFrecuency">
+		
+		<set var="createAt" value="generator.randomDate(new org.joda.time.DateTime(2000, 1,  1, 0, 0), new org.joda.time.DateTime(2014, 1,  1, 0, 0))" />
+		
+		<set var="data" type="java.lang.HashMap">
+			<set field="entity_id" value="parent.lugar_id" />
+			<set field="tag_id" value="tagSelector.getUnique(parent.lugar_id)" />
+			<set field="created_on" value="createAt.toDate()" />
+			<set field="created_by_id" value="1" />
+		</set>
+		
+		<db:insert table="snm_entity_tags" value="data" />
+		
+	</generate>
+	
+	<selector var="tagSelector" weightNull="0" weightValue="100" >
+		<sql>SELECT t.id FROM snm_tags t INNER JOIN snm_contexts c ON t.context_id = c.context_id WHERE c.name = 'lugar.tag'</sql>
+	</selector>
+	
+	<selector var="parentFrecuency">
+		<item weight="0" value="null"/>
+		<item weight="80" from="1" to="5"/>
+		<item weight="30" from="6" to="10"/>
+	</selector>
+	
+	<generate name="tags" title="snm_entities\snm_entity_tags\tags" 
+		type="child" source="parentList" parentFrecuency="parentFrecuency">
+		
+		<set var="createAt" value="generator.randomDate(new org.joda.time.DateTime(2000, 1,  1, 0, 0), new org.joda.time.DateTime(2014, 1,  1, 0, 0))" />
+		
+		<set var="data" type="java.lang.HashMap">
+			<set field="entity_id" value="parent.lugar_id" />
+			<set field="tag_id" value="tagSelector.getUnique(parent.lugar_id)" />
+			<set field="created_on" value="createAt.toDate()" />
+			<set field="created_by_id" value="1" />
+		</set>
+		
+		<db:insert table="snm_entity_tags" value="data" />
+		
+	</generate>
+	
+	<selector var="tagSelector" weightNull="0" weightValue="100" >
+		<sql>SELECT t.id FROM snm_tags t INNER JOIN snm_contexts c ON t.context_id = c.context_id WHERE c.name = 'lugar.requisito'</sql>
+	</selector>
+	
+	<selector var="parentFrecuency">
+		<item weight="0" value="null"/>
+		<item weight="80" from="1" to="2"/>
+	</selector>
+	
+	<generate name="tags" title="snm_entities\snm_entity_tags\tags" 
+		type="child" source="parentList" parentFrecuency="parentFrecuency">
+		
+		<set var="createAt" value="generator.randomDate(new org.joda.time.DateTime(2000, 1,  1, 0, 0), new org.joda.time.DateTime(2014, 1,  1, 0, 0))" />
+		
+		<set var="data" type="java.lang.HashMap">
+			<set field="entity_id" value="parent.lugar_id" />
+			<set field="tag_id" value="tagSelector.getUnique(parent.lugar_id)" />
+			<set field="created_on" value="createAt.toDate()" />
+			<set field="created_by_id" value="1" />
+		</set>
+		
+		<db:insert table="snm_entity_tags" value="data" />
+		
+	</generate>
+	
+	<selector var="categorySelector" weightNull="0" weightValue="100" >
+		<sql>SELECT t.category_id FROM snm_categories t INNER JOIN snm_contexts c ON t.context_id = c.context_id WHERE c.name = 'deporte'</sql>
+	</selector>
+	
+	<selector var="parentFrecuency">
+		<item weight="0" value="null"/>
+		<item weight="80" from="1" to="5"/>
+		<item weight="30" from="6" to="10"/>
+	</selector>
+	
+	<generate name="categories" title="snm_entities\snm_entity_categories\categories" 
+		type="child" source="parentList" parentFrecuency="parentFrecuency">
+		
+		<set var="createAt" value="generator.randomDate(new org.joda.time.DateTime(2000, 1,  1, 0, 0), new org.joda.time.DateTime(2014, 1,  1, 0, 0))" />
+		
+		<set var="data" type="java.lang.HashMap">
+			<set field="entity_id" value="parent.lugar_id" />
+			<set field="category_id" value="categorySelector.getUnique(parent.lugar_id)" />
+			<set field="created_on" value="createAt.toDate()" />
+			<set field="created_by_id" value="1" />
+		</set>
+		
+		<db:insert table="snm_entity_categories" value="data" />
+		
+	</generate>
+	
+	<selector var="categorySelector" weightNull="0" weightValue="100" >
+		<sql>SELECT t.category_id FROM snm_categories t INNER JOIN snm_contexts c ON t.context_id = c.context_id WHERE c.name = 'ciudad'</sql>
+	</selector>
+	
+	<selector var="parentFrecuency">
+		<item weight="0" value="null"/>
+		<item weight="80" from="1" to="1"/>
+	</selector>
+	
+	<generate name="categories" title="snm_entities\snm_entity_categories\ciudades" 
+		type="child" source="parentList" parentFrecuency="parentFrecuency">
+		
+		<set var="createAt" value="generator.randomDate(new org.joda.time.DateTime(2000, 1,  1, 0, 0), new org.joda.time.DateTime(2014, 1,  1, 0, 0))" />
+		
+		<set var="data" type="java.lang.HashMap">
+			<set field="entity_id" value="parent.lugar_id" />
+			<set field="category_id" value="categorySelector.getUnique(parent.lugar_id)" />
+			<set field="created_on" value="createAt.toDate()" />
+			<set field="created_by_id" value="1" />
+		</set>
+		
+		<db:insert table="snm_entity_categories" value="data" />
+		
+	</generate>
+	
+</generator>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module xmlns="http://www.esmartpoint.com/schema/random-generator"
+	xmlns:db="http://www.esmartpoint.com/schema/db-random-generator">
+	
+	<input name="entityList"/>
+	<input name="userSelector"/>
+	
+	<selector var="parentFrecuency">
+		<item weight="30" value="null"/>
+		<item weight="60" from="1" to="5"/>
+		<item weight="8" from="6" to="20"/>
+		<item weight="2" from="21" to="120"/>
+	</selector>
+	
+	<generate title="snm_entities\snm_entity_followers" 
+		type="child" source="entityList" parentFrecuency="parentFrecuency">
+		
+		<set var="createAt" value="generator.randomDate(new org.joda.time.DateTime(2000, 1,  1, 0, 0), new org.joda.time.DateTime(2014, 1,  1, 0, 0))" />
+		
+		<set var="data" type="java.util.HashMap">
+			<field name="entity_id" value="parent" />
+			<field name="follower_id" value="userSelector.getNext()" />
+			<field name="start_date" value="createAt.toDate()" />
+			<field name="is_current" value="1" />
+		</set>
+		
+		<db:insert table="snm_entity_followers" value="data" />
+		
+	</generate>
+	 
+</module>

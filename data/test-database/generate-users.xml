@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module xmlns="http://www.esmartpoint.com/schema/random-generator"
+	xmlns:db="http://www.esmartpoint.com/schema/db-random-generator"
+	xmlns:es="http://www.esmartpoint.com/schema/elasticsearch-random-generator">
+	
+	<input name="userCount"/>
+	<output name="userList" />
+	<output name="userSelector" />
+	
+	<selector var="isDeleted">
+		<item weight="10" value="true"/>
+		<item weight="90" value="false"/>
+	</selector>
+	
+	<selector var="isActive">
+		<item weight="10" value="true"/>
+		<item weight="90" value="false"/>
+	</selector>
+
+	<selector var="browserType">
+		<item weight="30" value="'Firefox'"/>
+		<item weight="40" value="'Chrome'"/>
+		<item weight="25" value="'IE'"/>
+		<item weight="5" value="'Other'"/>
+	</selector>	
+
+	<selector var="emailDomain">
+		<item weight="10" value="'ridermove.com'"/>
+		<item weight="30" value="'hotmail.com'"/>
+		<item weight="40" value="'gmail.com'"/>
+		<item weight="5" value="'yahoo.com'"/>
+		<item weight="5" value="'aol.com'"/>
+	</selector>		
+
+	<selector var="rank">
+		<item weight="10" value="1"/>
+		<item weight="20" value="2"/>
+		<item weight="30" value="3"/>
+		<item weight="50" value="4"/>
+		<item weight="10" value="5"/>
+	</selector>
+	
+	<db:load var="entityClass">
+		select * from snm_classes where package_name='org.snm.core' and class_name='User'
+	</db:load>
+	
+	<selector var="firstNameSelector" weightNull="0" keyValue="nombre" keyWeight="frecuencia" >
+		<sql>
+			SELECT * FROM datagen.src_nombres
+		</sql>
+	</selector>
+	
+	<selector var="lastNameSelector" weightNull="0" keyValue="apellido" keyWeight="frecuencia" >
+		<sql>
+			SELECT * FROM datagen.src_apellidos
+		</sql>
+	</selector>
+	
+	<def var="entity" type="java.util.HashMap" />
+	<def var="user" type="java.util.HashMap" />
+	
+	<generate title="snm_users" var="userList" element="globals.secuences.snm_entities" type="fixed" size="userCount">
+		<set var="secuences" field="snm_entities" value="globals.secuences.snm_entities + 1" scope="global" />
+		
+		<set var="firstName" value="firstNameSelector.getNext()" />
+		<set var="lastName1" value="lastNameSelector.getNext()" />
+		<set var="lastName2" value="lastNameSelector.getNext()" />
+		<set var="createAt" value="generator.randomDate(new org.joda.time.DateTime(2000, 1,  1, 0, 0), new org.joda.time.DateTime(2014, 1,  1, 0, 0))" />
+		<set var="modifiedAt" value="generator.randomDate(createAt, new org.joda.time.DateTime().now())" />
+		<set var="lastLogonAt" value="generator.randomDate(createAt, modifiedAt)" />
+		
+		<set var="entity">
+			<field name="entity_id" value="globals.secuences.snm_entities" />
+			<field name="name" value="firstName + ' ' + lastName1 + ' ' + lastName2" />
+			<field name="created_by" value="null" />
+			<field name="created_on" value="createAt.toDate()" />
+			<field name="entity_class_id" value="entityClass.id" />
+			<field name="rank" value="rank.getNext()" />
+			<field name="human_url_name" value="generator.toHumanURL(entity.name, 128)" />
+			<field name="is_deleted" value="generator.randomBoolean(90, 10)" />
+			<field name="modified_by" value="null" />
+			<field name="modified_on" value="createAt.toDate()" />
+			
+			<field name="num_comments" value="generator.randomInt(0, 1000)" />
+			<field name="num_documents" value="generator.randomInt(0, 1000)" />
+			<field name="num_evaluations" value="generator.randomInt(0, 1000)" />
+			<field name="num_likes" value="generator.randomInt(0, 1000)" />
+			<field name="num_nolikes" value="generator.randomInt(0, 1000)" />
+			<field name="num_members" value="generator.randomInt(0, 1000)" />
+			<field name="num_posts" value="generator.randomInt(0, 1000)" />
+			<field name="num_tasks" value="generator.randomInt(0, 1000)" />
+			<field name="num_visits" value="generator.randomInt(0, 1000)" />
+			<field name="num_notes" value="generator.randomInt(0, 1000)" />
+			<field name="num_followers" value="generator.randomInt(0, 1000)" />
+			<field name="num_questions" value="generator.randomInt(0, 1000)" />
+			<field name="num_suggests" value="generator.randomInt(0, 1000)" />
+		</set>
+		
+		<db:insert table="snm_entities" value="entity" />
+		
+		<set var="user">
+			<field name="user_id" value="globals.secuences.snm_entities" />
+			<field name="first_name" value="firstName" />
+			<field name="last_name" value="lastName1 + ' ' + lastName2" />
+			<field name="is_deleted" value="generator.randomBoolean(90, 10)" />
+			<field name="is_active" value="generator.randomBoolean(10, 90)" />
+			<field name="last_logon_at" value="lastLogonAt.toDate()" />
+			<field name="last_logon_ip" value="generator.randomIP()" />
+			<field name="browser_type" value="browserType.getNext()" />
+			<field name="email" value="generator.createUsername(firstName, lastName1, entity.entity_id) + '@' + emailDomain.getNext()" />
+			<field name="password" value="'secret'" />
+			<field name="created_on" value="createAt.toDate()" />
+			<field name="modified_on" value="createAt.toDate()" />
+		</set>
+		
+		<db:insert table="snm_users" value="user" />
+	</generate>
+	
+	<db:script>
+		update snm_users set email='nhernandez@esmartpoint.com', password='secret', first_name='Noel Carlos', 
+			last_name='Hernández Pérez',is_active=1,is_deleted=0 where user_id = (select min(entity_id) from snm_entities);
+		update snm_entities set name='Noel Carlos Hernández Pérez' where entity_id = (select min(user_id) from snm_users);
+		update snm_user_roles set role_id=1 where user_id = (select min(user_id) from snm_users);
+	</db:script>
+	
+	<selector var="parentFrecuency">
+		<item weight="10" value="null"/>
+		<item weight="90" value="1"/>
+	</selector>
+
+	<def var="data" type="java.util.HashMap" />
+
+	<generate title="snm_users\user_profile" 
+		type="child" source="userList" parentFrecuency="parentFrecuency">
+		
+		<set var="data">
+			<field name="user_id" value="parent" />
+			<field name="resumen" value="generator.randomParagraph(128, 500, 10, 64, 2, 8)" />
+			<field name="presentacion_personal" value="generator.randomTitle(10, 50, 2, 8)" />
+			<field name="actionbar_background_color" value="generator.randomHexNumeric(6)" />
+		</set> 
+		
+		<db:insert table="user_profile" value="data" />
+		
+	</generate>
+
+	<selector var="fileExtension">
+		<item weight="75" value="'jpg'"/>
+		<item weight="20" value="'png'"/>
+		<item weight="5" value="'bmp'"/>
+	</selector>
+	
+	<generate title="snm_users\snm_archives" type="child" source="userList" parentFrecuency="parentFrecuency">
+		<set var="secuences" field="snm_archives" value="globals.secuences.snm_archives + 1" scope="global"/>
+		
+		<set var="createAt" value="generator.randomDate(new org.joda.time.DateTime(2000, 1,  1, 0, 0), new org.joda.time.DateTime(2014, 1,  1, 0, 0))" />
+		<set var="ext" value="fileExtension.getNext()" />
+		<set var="fileName" value="generator.randomFilename(10,28,3,8,ext)" />
+		
+		<set var="data" type="java.util.HashMap">
+			<field name="id" value="globals.secuences.snm_archives" />
+			<field name="created_by_id" value="parent" />
+			<field name="created_at" value="createAt.toDate()" />
+			<field name="deleted_by_id" value="null" />
+			<field name="deleted_at" value="null" />
+			<field name="crop_x1" value="0" />
+			<field name="crop_y1" value="0" />
+			<field name="crop_x2" value="generator.randomNumberWithStep(50, 250, 25)" />
+			<field name="crop_y2" value="generator.randomNumberWithStep(50, 250, 25)" />
+			<field name="file_size" value="generator.randomNumberWithStep(1024, 1024*100000, 1024)" />
+			<field name="width" value="generator.randomNumberWithStep(50, 250, 25)" />
+			<field name="height" value="generator.randomNumberWithStep(50, 250, 25)" />
+				
+			<field name="location" value="fileName" />
+			<field name="name" value="fileName" />
+			<field name="original" value="fileName" />
+			<field name="type" value="ext" />
+		</set> 
+		
+		<db:insert table="snm_archives" value="data" />
+		
+	</generate>
+	
+	<selector var="rol">
+		<item weight="10" value="1"/>
+		<item weight="90" value="2"/>
+		<item weight="900" value="3"/>
+	</selector>
+	
+	<generate title="snm_users\snm_user_roles" type="child" source="userList" parentFrecuency="parentFrecuency">
+		
+		<set var="createAt" value="generator.randomDate(new org.joda.time.DateTime(2000, 1,  1, 0, 0), new org.joda.time.DateTime(2014, 1,  1, 0, 0))" />
+		
+		<set var="data" type="java.util.HashMap">
+			<field name="user_id" value="parent" />
+			<field name="start_date" value="createAt.toDate()" />
+			<field name="role_id" value="rol.getNext()" />
+			<field name="is_current" value="true" />
+		</set> 
+		
+		<db:insert table="snm_user_roles" value="data" />
+		
+	</generate>
+	
+	<db:list var="userList" projectToMap="false">
+		select user_id from snm_users where is_active=1
+	</db:list>
+
+	<selector var="parentFrecuency">
+		<item weight="20" value="null"/>
+		<item weight="80" from="1" to="5"/>
+		<item weight="30" from="6" to="10"/>
+		<item weight="3" from="10" to="50"/>
+	</selector>
+	
+	<selector var="userSelector" items="userList" weightNull="0" weightValue="90" />
+	
+	<execute file="generate-albums.xml">
+		<input name="entityList" value="userList" />
+		<input name="userSelector" />
+	</execute>
+	
+	<execute file="generate-followers.xml">
+		<input name="entityList" value="userList" />
+		<input name="userSelector" />
+	</execute>
+	
+	<execute file="generate-evaluations.xml">
+		<input name="entityList" value="userList" />
+		<input name="userSelector" />
+	</execute>
+	
+</module>

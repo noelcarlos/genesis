@@ -1,0 +1,187 @@
+// Crear el indice
+
+localhost:9200/ridermove/
+PUT 
+"settings" : {
+        "number_of_shards" : 3,
+        "number_of_replicas" : 2
+}
+
+localhost:9200
+PUT /ridermove/lugar/_mapping/lugar
+{
+	"lugar" : {
+		"properties" : {
+			"id" : { "type" : "integer", "store" : false, "index" : "not_analyzed" },
+			"entityId" : { "type" : "integer", "store" : false, "index" : "not_analyzed" },
+			"name" : { "type" : "string", "store" : true },
+			"entityClassName" : { "type" : "string", "store" : true },
+			"entityClassPackageName" : { "type" : "string", "store" : true },
+			"entityClassClassName" : { "type" : "string", "store" : true },
+			"entityClassId" : { "type" : "integer", "store" : false, "index" : "not_analyzed" },
+			"createdById" : { "type" : "integer", "store" : false, "index" : "not_analyzed" },
+			"createdByEmail" : { "type" : "string", "store" : true },
+			"createdByPassword" : { "type" : "string", "store" : true },
+			"createdByFirstName" : { "type" : "string", "store" : true },
+			"createdByLastName" : { "type" : "string", "store" : true },
+			"createdByAvatarLocation" : { "type" : "string", "store" : true },
+			"createdByAvatarId" : { "type" : "integer", "store" : false, "index" : "not_analyzed" },
+			"createdOn" : { "type" : "date", "format" : "yyyy-MM-dd HH:mm:ss", "store" : true, "index" : "not_analyzed" },
+			"modifiedById" : { "type" : "integer", "store" : false, "index" : "not_analyzed" },
+			"modifiedByEmail" : { "type" : "string", "store" : true },
+			"modifiedByPassword" : { "type" : "string", "store" : true },
+			"modifiedByFirstName" : { "type" : "string", "store" : true },
+			"modifiedByLastName" : { "type" : "string", "store" : true },
+			"modifiedByAvatarLocation" : { "type" : "string", "store" : true },
+			"modifiedByAvatarId" : { "type" : "integer", "store" : false, "index" : "not_analyzed" },
+			"modifiedOn" : { "type" : "date", "format" : "yyyy-MM-dd HH:mm:ss", "store" : true, "index" : "not_analyzed" },
+			"isDeleted" : { "type" : "boolean", "store" : true },
+			"humanUrlName" : { "type" : "string", "store" : true },
+			"numLikes" : { "type" : "integer", "store" : false, "index" : "not_analyzed" },
+			"numVisits" : { "type" : "integer", "store" : false, "index" : "not_analyzed" },
+			"numComments" : { "type" : "integer", "store" : false, "index" : "not_analyzed" },
+			"numPosts" : { "type" : "integer", "store" : false, "index" : "not_analyzed" },
+			"numMembers" : { "type" : "integer", "store" : false, "index" : "not_analyzed" },
+			"numEvaluations" : { "type" : "integer", "store" : false, "index" : "not_analyzed" },
+			"numDocuments" : { "type" : "integer", "store" : false, "index" : "not_analyzed" },
+			"numNolikes" : { "type" : "integer", "store" : false, "index" : "not_analyzed" },
+			"numNotes" : { "type" : "integer", "store" : false, "index" : "not_analyzed" },
+			"numTasks" : { "type" : "integer", "store" : false, "index" : "not_analyzed" },
+			"numFollowers" : { "type" : "integer", "store" : false, "index" : "not_analyzed" },
+			"numQuestions" : { "type" : "integer", "store" : false, "index" : "not_analyzed" },
+			"numSuggests" : { "type" : "integer", "store" : false, "index" : "not_analyzed" },
+			"rank" : { "type" : "integer", "store" : false, "index" : "not_analyzed" },
+			"exportedOn" : { "type" : "date", "format" : "yyyy-MM-dd HH:mm:ss", "store" : true, "index" : "not_analyzed" },
+			"categories" : { 
+				"properties" : {
+					"categoryId" : { "type" : "integer", "store" : false, "index" : "not_analyzed" },
+					"name" : { "type" : "string", "store" : true },
+					"order" : { "type" : "integer", "store" : false, "index" : "not_analyzed" },
+					"value" : { "type" : "integer", "store" : false, "index" : "not_analyzed" },
+					"entityId" : { "type" : "integer", "store" : false, "index" : "not_analyzed" },
+					"contextId" : { "type" : "integer", "store" : false, "index" : "not_analyzed" },
+					"contextName" : { "type" : "string", "store" : true }
+				}
+	
+			 },
+			"tags" : { 
+				"properties" : {
+					"tagId" : { "type" : "integer", "store" : false, "index" : "not_analyzed" },
+					"entityId" : { "type" : "integer", "store" : false, "index" : "not_analyzed" },
+					"name" : { "type" : "string", "store" : true },
+					"contextId" : { "type" : "integer", "store" : false, "index" : "not_analyzed" },
+					"contextName" : { "type" : "string", "store" : true }
+				}
+	
+			 },
+			"description" : { "type" : "string", "store" : true },
+			"buildInformation" : { "type" : "string", "store" : true },
+			"designInformation" : { "type" : "string", "store" : true },
+			"isSeasonable" : { "type" : "boolean", "store" : true },
+			"alternateNames" : { "type" : "string", "store" : true },
+			"location" : { "type" : "string", "store" : true },
+			"geoLocationX" : { "type" : "float", "store" : false, "index" : "not_analyzed" },
+			"geoLocationY" : { "type" : "float", "store" : false, "index" : "not_analyzed" },
+			"dimensiones" : { "type" : "float", "store" : false, "index" : "not_analyzed" },
+			"horario" : { "type" : "string", "store" : true },
+			"comoLlegar" : { "type" : "string", "store" : true },
+			"servicios" : { 
+				"properties" : {
+					"tagId" : { "type" : "integer", "store" : false, "index" : "not_analyzed" },
+					"entityId" : { "type" : "integer", "store" : false, "index" : "not_analyzed" },
+					"name" : { "type" : "string", "store" : true },
+					"contextId" : { "type" : "integer", "store" : false, "index" : "not_analyzed" },
+					"contextName" : { "type" : "string", "store" : true }
+				}
+	
+			 },
+			"locations" : { 
+				"properties" : {
+					"categoryId" : { "type" : "integer", "store" : false, "index" : "not_analyzed" },
+					"name" : { "type" : "string", "store" : true },
+					"order" : { "type" : "integer", "store" : false, "index" : "not_analyzed" },
+					"value" : { "type" : "integer", "store" : false, "index" : "not_analyzed" },
+					"entityId" : { "type" : "integer", "store" : false, "index" : "not_analyzed" },
+					"contextId" : { "type" : "integer", "store" : false, "index" : "not_analyzed" },
+					"contextName" : { "type" : "string", "store" : true }
+				}
+	
+			 },
+			"requisitos" : { 
+				"properties" : {
+					"tagId" : { "type" : "integer", "store" : false, "index" : "not_analyzed" },
+					"entityId" : { "type" : "integer", "store" : false, "index" : "not_analyzed" },
+					"name" : { "type" : "string", "store" : true },
+					"contextId" : { "type" : "integer", "store" : false, "index" : "not_analyzed" },
+					"contextName" : { "type" : "string", "store" : true }
+				}
+	
+			 },
+			"imageId" : { "type" : "integer", "store" : false, "index" : "not_analyzed" },
+			"imageLocation" : { "type" : "string", "store" : true },
+			"ciudadId" : { "type" : "integer", "store" : false, "index" : "not_analyzed" },
+			"ciudadNombre" : { "type" : "string", "store" : true }
+		}
+	}
+}
+
+localhost:9200
+PUT /ridermove/snm_users/_mapping
+{
+	"snm_users" : {
+	    "properties" : {
+	        "message" : {"type" : "string", "store" : true },
+	    	"entity_class_id": {"type" : "integer", "store" : true },
+			"name" : {"type" : "string", "store" : true },
+			"created_by" : {"type" : "string", "store" : true },
+			"created_by_id" : {"type" : "integer", "store" : true, "index" : "not_analyzed" },
+			"created_on" :  {"type" : "date", "format" : "yyyy-MM-dd HH:mm:ss", "store" : true, "index" : "not_analyzed" },
+			"modified_by" : {"type" : "string", "store" : true },
+			"modified_on" :  {"type" : "date", "format" : "yyyy-MM-dd HH:mm:ss", "store" : true, "index" : "not_analyzed" },
+			"is_deleted" : {"type" : "boolean", "store" : true, "index" : "not_analyzed" },
+			"human_url_name" : {"type" : "string", "store" : true },
+			"num_likes" : {"type" : "integer", "store" : false, "index" : "not_analyzed" },
+			"num_visits" : {"type" : "integer", "store" : false, "index" : "not_analyzed" },
+			"num_comments" : {"type" : "integer", "store" : false, "index" : "not_analyzed" },
+			"num_posts" : {"type" : "integer", "store" : false, "index" : "not_analyzed" },
+			"num_members" : {"type" : "integer", "store" : false, "index" : "not_analyzed" },
+			"num_evaluations" : {"type" : "integer", "store" : false, "index" : "not_analyzed" },
+			"num_documents" : {"type" : "integer", "store" : false, "index" : "not_analyzed" },
+			"num_tasks" : {"type" : "integer", "store" : false, "index" : "not_analyzed" },
+			"rank" : {"type" : "integer", "store" : false, "index" : "not_analyzed" },
+			"tags" : {
+                "properties" : {
+                    "tagId" : {"type" : "integer"},
+                    "entityId" : {"type" : "integer"},
+                    "name" : {"type" : "string"}
+                    "contextId" : {"type" : "integer"},
+                    "contextName" : {"type" : "string"}
+                }
+            },
+			"categories" : {
+                "properties" : {
+                    "categoryId" : {"type" : "integer"},
+                    "entityId" : {"type" : "integer"},
+                    "name" : {"type" : "string"}
+                    "contextId" : {"type" : "integer"},
+                    "contextName" : {"type" : "string"}
+                }
+            },
+			"locations" : {
+                "properties" : {
+                    "categoryId" : {"type" : "integer"},
+                    "entityId" : {"type" : "integer"},
+                    "name" : {"type" : "string"}
+                    "contextId" : {"type" : "integer"},
+                    "contextName" : {"type" : "string"}
+                }
+            },
+			"groups_list" : {"type" : "string", "store" : true },
+			"departments_list" : {"type" : "string", "store" : true },
+			"organizations_list" : {"type" : "string", "store" : true },
+			"teams_list" : {"type" : "string", "store" : true }
+	    }
+	}
+}
+
+

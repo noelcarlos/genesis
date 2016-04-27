@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<generator xmlns="http://www.esmartpoint.com/schema/random-generator"
+	xmlns:db="http://www.esmartpoint.com/schema/db-random-generator">
+	
+	<selector var="parentFrecuency">
+		<item weight="20" value="null"/>
+		<item weight="80" from="1" to="5"/>
+		<item weight="30" from="6" to="10"/>
+		<item weight="3" from="10" to="50"/>
+	</selector>
+	
+	<db:list var="albumItemsCommentList">
+		select comment_id from snm_entity_comments
+	</db:list>	
+	
+	<selector var="userSelector" weightNull="0" weightValue="100" >
+		<sql>SELECT user_id FROM snm_users</sql>
+	</selector>
+	
+	<generate name="snm_entity_likes" title="snm_entities\snm_entity_albums\snm_entity_likes" 
+		type="child" source="albumItemsCommentList" parentFrecuency="parentFrecuency">
+		
+		<set var="createAt" value="#generator.randomDate(new org.joda.time.DateTime(2000, 1,  1, 0, 0), new org.joda.time.DateTime(2014, 1,  1, 0, 0))" />
+		
+		<set var="data" type="java.lang.HashMap">
+			<set field="entity_id" value="#parent['comment_id']" />
+			<set field="user_id" value="#userSelector.getNext()" />
+			<set field="start_date" value="#createAt.toDate()" />
+			<set field="is_current" value="true" />
+		</set>
+		
+		<db:insert table="snm_entity_likes" value="data" />
+		
+	</generate>
+	
+	<call name="snm_entity_likes" title="*\snm_entity_albums\snm_album_items\snm_album_comments\snm_entity_likes" source="albumItemsCommentList" />
+	
+</generator>

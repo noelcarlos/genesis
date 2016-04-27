@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module xmlns="http://www.esmartpoint.com/schema/random-generator"
+	xmlns:db="http://www.esmartpoint.com/schema/random-generator/db"
+	xmlns:es="http://www.esmartpoint.com/schema/random-generator/elasticsearch"
+	xmlns:http="http://www.esmartpoint.com/schema/random-generator/http">
+	
+	<db:connection driverClassName="com.mysql.jdbc.Driver" url="jdbc:mysql://localhost:3306/ridermove-test?useUnicode=yes&amp;characterEncoding=UTF-8" username="ridermove" password="ridermove" />
+	<!-- 
+	<es:connection name="ridermove" url="http://localhost:9200/ridermove" />
+	 -->
+	
+	<set var="ridermoveElasticsearchUrl" value="'http://localhost:9200/ridermove'" />
+	
+	<http:delete url="ridermoveElasticsearchUrl+'/lugar'" result="result" resultType="JSON" />
+	<!-- <assert condition="result.acknowledged==true" /> -->
+	
+	<http:post url="ridermoveElasticsearchUrl+'/lugar'" result="result" resultType="JSON">
+		{
+			"settings": {
+		      "mapping.allow_type_wrapper": true,
+		      "number_of_shards" : 1,
+              "number_of_replicas" : 0
+			}
+		}
+	</http:post>
+	<assert condition="result.created==true" />
+	
+	<!-- 
+	<debug>${generator.randomText(64, 4000, '\r\n', 64, 400, 12, 64, 3, 8)}</debug>
+	 -->
+	
+	<set var="MAX_USERS" value="250000" />
+	<set var="MAX_LUGARES" value="3" />
+	
+	<execute file="generate-users.xml">
+		<input name="userCount" value="MAX_USERS" />
+		<input name="ridermoveElasticsearchUrl" value="ridermoveElasticsearchUrl" />
+		<output name="userList"/>
+		<output name="userSelector" />
+	</execute>
+	 
+	<!-- 
+	<execute file="generate-lugares.xml">
+		<input name="lugarCount" value="MAX_LUGARES" />
+		<input name="userList"/>
+		<input name="userSelector" />
+		<output name="lugarList"/>
+	</execute>
+	 -->
+	
+	<debug>Numero de usuarios: ${userList.size()}</debug>
+	<debug>Numero de lugares: ${lugarList.size()}</debug>
+	
+</module>
