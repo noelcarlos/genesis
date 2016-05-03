@@ -44,6 +44,7 @@ public class CouchbaseGeneratorScript {
 		
 		bucket.bucketManager().createPrimaryIndex("primary", true, false);
 		bucket.bucketManager().createIndex("id", true, false, "id");
+		bucket.bucketManager().createIndex("type", true, false, "type");
 		//bucket.bucketManager().flush(100, TimeUnit.MINUTES);
 		generateMain();
 		cluster.disconnect();
@@ -74,6 +75,7 @@ public class CouchbaseGeneratorScript {
 		dbHelper.closeConnection(null);
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void generateUsers() throws Exception {
 		WeightedItemSelector<Boolean> isDeleted =  new WeightedItemSelector<Boolean>()
 			.add(10, true)
@@ -152,7 +154,6 @@ public class CouchbaseGeneratorScript {
 			
 			body.put("id", i+1);
 			body.put("type", "user");
-			body.put("_type", "User");
 			
 			JSONObject entity = new JSONObject();
 			entity.put("name", generator.randomTitle(10, 64, 2, 8));

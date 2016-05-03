@@ -21,7 +21,7 @@ public class ElasticRidermoveGeneratorScript {
 	@Autowired HttpHelper httpHelper;
 	@Autowired DbHelper dbHelper;
 	
-	int MAX_USERS = 2500000;
+	int MAX_USERS = 250000000;
 	int MAX_LUGARES = 100;
 	
 	String ridermoveElasticsearchUrl="http://localhost:9200/ridermove";
@@ -35,11 +35,14 @@ public class ElasticRidermoveGeneratorScript {
 	}
 	
 	private void generateMain() throws Exception {
-		dbHelper.createConnection(null, "org.postgresql.Driver", 
-			"jdbc:postgresql://localhost:5432/ridermove?charSet=UTF8", 
-			"wwwwww", "postgres", "org.hibernate.dialect.PostgreSQLDialect");
+//		dbHelper.createConnection(null, "org.postgresql.Driver", 
+//			"jdbc:postgresql://localhost:5432/ridermove?charSet=UTF8", 
+//			"wwwwww", "postgres", "org.hibernate.dialect.PostgreSQLDialect");
+		dbHelper.createConnection(null, "com.mysql.jdbc.Driver", 
+				"jdbc:mysql://localhost:3306/ridermove-test?charSet=UTF8", 
+				"wwwwww", "root", "org.hibernate.dialect.MySQL5InnoDBDialect");
 
-		httpHelper.delete(ridermoveElasticsearchUrl + "/lugar", "JSON");
+		//httpHelper.delete(ridermoveElasticsearchUrl + "/lugar", "JSON");
 		httpHelper.post(ridermoveElasticsearchUrl + "/lugar", 
 			"{" + 
 				"\"settings\": {" + 
@@ -129,6 +132,8 @@ public class ElasticRidermoveGeneratorScript {
 			DateTime lastLogonAt = generator.randomDate(createAt, modifiedAt);
 
 			JSONObject body = new JSONObject();
+			body.put("id", i+1);
+			body.put("type", "user");
 			
 			JSONObject entity = new JSONObject();
 			entity.put("name", generator.randomTitle(10, 64, 2, 8));
