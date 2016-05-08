@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module xmlns="http://www.esmartpoint.com/schema/random-generator"
+	xmlns:db="http://www.esmartpoint.com/schema/db-random-generator"
+	xmlns:logic="http://www.esmartpoint.com/schema/logic-random-generator">
+	
+	<input name="lugarCount"/>
+	<input name="userList"/>
+	<input name="userSelector" />
+	<output name="lugarList" />
+	
+	<selector var="isDeleted">
+		<item weight="10" value="true"/>
+		<item weight="90" value="false"/>
+	</selector>
+	
+	<selector var="isActive">
+		<item weight="10" value="true"/>
+		<item weight="90" value="false"/>
+	</selector>
+
+	<selector var="browserType">
+		<item weight="30" value="'Firefox'"/>
+		<item weight="40" value="'Chrome'"/>
+		<item weight="25" value="'IE'"/>
+		<item weight="5" value="'Other'"/>
+	</selector>	
+
+	<selector var="emailDomain">
+		<item weight="10" value="'ridermove.com'"/>
+		<item weight="30" value="'hotmail.com'"/>
+		<item weight="40" value="'gmail.com'"/>
+		<item weight="5" value="'yahoo.com'"/>
+		<item weight="5" value="'aol.com'"/>
+	</selector>		
+
+	<selector var="rank">
+		<item weight="10" value="1"/>
+		<item weight="20" value="2"/>
+		<item weight="30" value="3"/>
+		<item weight="50" value="4"/>
+		<item weight="10" value="5"/>
+	</selector>
+	
+	<db:load var="entityClass">
+		select * from scd_classes where package_name='org.followfun.Evento' and class_name='Evento'
+	</db:load>
+	
+	<generate title="eventos" var="lugarList" element="globals.secuences.scd_entities" type="fixed" size="lugarCount">
+		<set var="secuences" field="scd_entities" value="globals.secuences.scd_entities + 1" scope="global" />
+		
+		<set var="firstName" value="generator.randomFirstName()" />
+		<set var="lastName" value="generator.randomLastName()" />
+		<set var="createAt" value="generator.randomDate(new org.joda.time.DateTime(2000, 1,  1, 0, 0), new org.joda.time.DateTime(2014, 1,  1, 0, 0))" />
+		<set var="modifiedAt" value="generator.randomDate(createAt, new org.joda.time.DateTime().now())" />
+		<set var="lastLogonAt" value="generator.randomDate(createAt, modifiedAt)" />
+		
+		<set var="entity" type="java.util.HashMap">
+			<field name="entity_id" value="globals.secuences.scd_entities" />
+
+			<field name="name" value="generator.randomTitle(10, 64, 2, 8)" />
+			<field name="created_by" value="userSelector.getNext()" />
+			<field name="created_on" value="createAt.toDate()" />
+			<field name="entity_class_id" value="entityClass.id" />
+			<field name="rank" value="rank.getNext()" />
+			<field name="human_url_name" value="generator.toHumanURL(entity.name, 128)" />
+			<field name="is_deleted" value="generator.randomBoolean(90, 10)" />
+			<field name="modified_by" value="null" />
+			<field name="modified_on" value="createAt.toDate()" />
+			
+			<field name="num_comments" value="generator.randomInt(0, 1000)" />
+			<field name="num_documents" value="generator.randomInt(0, 1000)" />
+			<field name="num_evaluations" value="generator.randomInt(0, 1000)" />
+			<field name="num_likes" value="generator.randomInt(0, 1000)" />
+			<field name="num_nolikes" value="generator.randomInt(0, 1000)" />
+			<field name="num_members" value="generator.randomInt(0, 1000)" />
+			<field name="num_posts" value="generator.randomInt(0, 1000)" />
+			<field name="num_tasks" value="generator.randomInt(0, 1000)" />
+			<field name="num_visits" value="generator.randomInt(0, 1000)" />
+			<field name="num_notes" value="generator.randomInt(0, 1000)" />
+			<field name="num_followers" value="generator.randomInt(0, 1000)" />
+			<field name="num_questions" value="generator.randomInt(0, 1000)" />
+			<field name="num_suggests" value="generator.randomInt(0, 1000)" />
+		</set>
+		
+		<db:insert table="scd_entities" value="entity" key="entity_id" />
+		
+		<set var="data" type="java.util.HashMap">
+			<field name="evento_id" value="globals.secuences.scd_entities" />
+			
+			<field name="description" value="generator.randomParagraph(128, 500, 10, 64, 2, 8)" />
+			<field name="is_seasonable" value="false" />
+			<field name="build_information" value="generator.randomParagraph(64, 128, 10, 64, 2, 8)" />
+			<field name="design_information" value="generator.randomParagraph(64, 128, 10, 64, 2, 8)" />
+			<field name="alternate_names" value="generator.randomTitle(10, 50, 2, 8)" />
+			<field name="location" value="generator.randomTitle(10, 50, 2, 8)" />
+			<field name="geo_location_x" value="generator.randomInt(0, 1000)" />
+			<field name="geo_location_y" value="generator.randomInt(0, 1000)" />
+			<field name="dimensiones" value="generator.randomInt(20, 1000)" />
+			<field name="horario" value="generator.randomTitle(10, 50, 2, 8)" />
+			<field name="servicios" value="generator.randomTitle(10, 50, 2, 8)" />
+			<field name="requisitos" value="generator.randomTitle(10, 50, 2, 8)" />
+		</set>
+		
+		<db:insert table="eventos" value="data" />
+		
+	</generate>
+	
+	<db:list var="lugarList" projectToMap="false">
+		select lugar_id from lugares
+	</db:list>
+	
+	<selector var="parentFrecuency">
+		<item weight="10" value="null"/>
+		<item weight="90" value="1"/>
+	</selector>
+	
+	<execute file="generate-evaluations.xml">
+		<input name="entityList" value="lugarList" />
+		<input name="userSelector" />
+	</execute>
+
+	<execute file="generate-posts.xml">
+		<input name="entityList" value="lugarList" />
+		<input name="userSelector" />
+	</execute>
+
+	<execute file="generate-albums.xml">
+		<input name="entityList" value="lugarList" />
+		<input name="userSelector" />
+	</execute>
+
+	<execute file="generate-categories.xml">
+		<input name="entityList" value="lugarList" />
+		<input name="userSelector" />
+		<input name="contextName" value="'ciudad'"/>
+	</execute>
+	
+	<execute file="generate-categories.xml">
+		<input name="entityList" value="lugarList" />
+		<input name="userSelector" />
+		<input name="contextName" value="'deporte'"/>
+	</execute>
+	
+	<execute file="generate-tags.xml">
+		<input name="entityList" value="lugarList" />
+		<input name="userSelector" />
+		<input name="contextName" value="'lugar.servicio'"/>
+	</execute>
+	
+	<execute file="generate-tags.xml">
+		<input name="entityList" value="lugarList" />
+		<input name="userSelector" />
+		<input name="contextName" value="'lugar.requisito'"/>
+	</execute>
+	
+	<execute file="generate-tags.xml">
+		<input name="entityList" value="lugarList" />
+		<input name="userSelector" />
+		<input name="contextName" value="'lugar.tag'"/>
+	</execute>
+	
+	<logic:if test="globals.DIALECT != 'postgresql'">
+		<db:script>
+			UPDATE lugares l INNER JOIN scd_entities x ON l.lugar_id = x.entity_id 
+			INNER JOIN (select e.entity_id, group_concat(distinct c.name) as name 
+				FROM scd_entities e 
+					INNER JOIN scd_entity_tags ec on e.entity_id = ec.entity_id 
+					INNER JOIN scd_tags c on ec.tag_id = c.id 
+					INNER JOIN scd_contexts cnt ON c.context_id = cnt.context_id WHERE cnt.name = 'lugar.servicio'
+				group by e.entity_id) AS e ON x.entity_id = e.entity_id
+			SET l.servicios = e.name;
+			
+			UPDATE lugares l INNER JOIN scd_entities x ON l.lugar_id = x.entity_id 
+			INNER JOIN (select e.entity_id, group_concat(distinct c.name) as name 
+				FROM scd_entities e 
+					INNER JOIN scd_entity_tags ec on e.entity_id = ec.entity_id 
+					INNER JOIN scd_tags c on ec.tag_id = c.id 
+					INNER JOIN scd_contexts cnt ON c.context_id = cnt.context_id WHERE cnt.name = 'lugar.requisito'
+				group by e.entity_id) AS e ON x.entity_id = e.entity_id
+			SET l.requisitos = e.name;
+			
+			UPDATE lugares l INNER JOIN scd_entities x ON l.lugar_id = x.entity_id 
+			INNER JOIN (select e.entity_id, group_concat(distinct c.name) as name 
+				FROM scd_entities e 
+					INNER JOIN scd_entity_tags ec on e.entity_id = ec.entity_id 
+					INNER JOIN scd_tags c on ec.tag_id = c.id 
+					INNER JOIN scd_contexts cnt ON c.context_id = cnt.context_id WHERE cnt.name = 'lugar.categoria'
+				group by e.entity_id) AS e ON x.entity_id = e.entity_id
+			SET x.categories = e.name;
+			
+			update scd_entities x 
+			INNER JOIN lugares l ON l.lugar_id = x.entity_id  
+			INNER JOIN  (select e.entity_id, group_concat(distinct c.name) as name 
+				from 
+					scd_entities e 
+					inner join scd_entity_categories ec on e.entity_id = ec.entity_id 
+					inner join scd_categories c on ec.category_id = c.category_id
+					INNER JOIN scd_contexts cnt ON c.context_id = cnt.context_id 
+				WHERE cnt.name = 'deporte'
+				group by e.entity_id) AS e ON x.entity_id = e.entity_id
+			set x.categories = e.name;
+			
+			update scd_entities x 
+			INNER JOIN lugares l ON l.lugar_id = x.entity_id  
+			INNER JOIN (select e.entity_id, group_concat(distinct c.name) as name from scd_entities e 
+				inner join scd_entity_tags ec on e.entity_id = ec.entity_id 
+				inner join scd_tags c on ec.tag_id = c.id
+				INNER JOIN scd_contexts cnt ON c.context_id = cnt.context_id WHERE cnt.name = 'lugar.tag' 
+				group by e.entity_id) AS e ON x.entity_id = e.entity_id
+			set x.tags = e.name;
+		</db:script>
+	</logic:if>
+		
+	<execute file="generate-comments.xml">
+		<input name="entityList" value="lugarList" />
+		<input name="userSelector" />
+	</execute>
+
+	<execute file="generate-followers.xml">
+		<input name="entityList" value="lugarList" />
+		<input name="userSelector" />
+	</execute>
+	
+	<execute file="generate-questions.xml">
+		<input name="entityList" value="lugarList" />
+		<input name="userSelector" />
+	</execute>
+	
+</module>

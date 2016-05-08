@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
+import org.esmartpoint.genesis.generator.GenesisApp;
 import org.esmartpoint.genesis.helpers.DbHelper;
 import org.esmartpoint.genesis.helpers.GeneratorHelper;
 import org.esmartpoint.genesis.helpers.HttpHelper;
@@ -12,6 +13,8 @@ import org.esmartpoint.genesis.selectors.WeightedEntitySelector;
 import org.esmartpoint.genesis.selectors.WeightedItemSelector;
 import org.esmartpoint.genesis.selectors.WeightedMapSelector;
 import org.joda.time.DateTime;
+import org.joda.time.Period;
+import org.joda.time.format.PeriodFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +23,8 @@ import com.couchbase.client.java.Cluster;
 import com.couchbase.client.java.CouchbaseCluster;
 import com.couchbase.client.java.document.JsonDocument;
 import com.couchbase.client.java.document.json.JsonObject;
+import com.couchbase.client.java.query.N1qlQuery;
+import com.couchbase.client.java.query.N1qlQueryResult;
 
 @Service
 public class CouchbaseGeneratorScript {
@@ -39,14 +44,22 @@ public class CouchbaseGeneratorScript {
 	}
 	
 	public void run() throws Exception {
-		cluster = CouchbaseCluster.create("localhost");
+		cluster = CouchbaseCluster.create("192.168.1.11");
 		bucket = cluster.openBucket("allianz");
+
+//    	DateTime start = DateTime.now();
+//    	for (int i = 0; i < 1000; i++) {
+//    		N1qlQueryResult queryResult = bucket.query(N1qlQuery.simple("SELECT * FROM allianz WHERE id=" + generator.randomInt(50000, 10000000)));
+//    		//System.out.println(queryResult.allRows().size());
+//    	}
+//    	System.out.println("Terminado en, " + PeriodFormat.getDefault().print(new Period(start, DateTime.now())));
 		
 		bucket.bucketManager().createPrimaryIndex("primary", true, false);
 		bucket.bucketManager().createIndex("id", true, false, "id");
 		bucket.bucketManager().createIndex("type", true, false, "type");
-		//bucket.bucketManager().flush(100, TimeUnit.MINUTES);
+//
 		generateMain();
+		
 		cluster.disconnect();
 
 	}
@@ -219,9 +232,9 @@ public class CouchbaseGeneratorScript {
 			body.put("browserType", browserType.getNext());
 			body.put("email", firstName.toLowerCase() + "." + lastName1.toLowerCase() + "@" + emailDomain.getNext());
 			body.put("password", "secret");
-			body.put("resumen", generator.randomParagraph(128, 500, 10, 64, 2, 8));
+			/*body.put("resumen", generator.randomParagraph(128, 500, 10, 64, 2, 8));
 			body.put("presentacionPersonal", generator.randomTitle(10, 50, 2, 8));
-			body.put("actionbarBackgroundColor", generator.randomHexNumeric(6));
+			body.put("actionbarBackgroundColor", generator.randomHexNumeric(6));*/
 			
 			JSONArray servicios = new JSONArray();
 			servicioSelector.restart();

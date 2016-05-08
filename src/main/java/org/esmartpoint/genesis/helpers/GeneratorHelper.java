@@ -238,9 +238,18 @@ public class GeneratorHelper {
 		return "58798caf-6850-466d-9549-d16b8e769dc8";
 	}
 
-	public String randomPhone() {
-		//TODO: Missing implentation
-		return "+1 (842) 467-3358";
+	/**
+	 * Returns a randomPhone based on pattern 9# ### ## ## 6## ### ###
+	 * @param pattern
+	 * @return
+	 */
+	public String randomPhone(String pattern) {
+		int count = StringUtils.countMatches(pattern, "#");
+		String res = pattern;
+		for (int i = 0; i <count; i++) {
+			res = StringUtils.replaceOnce(res, "#", "" + randomNumber(0, 9));
+		}
+		return res;
 	}
 
 	public String randomAddress() {

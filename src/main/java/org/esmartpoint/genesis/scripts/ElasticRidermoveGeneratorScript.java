@@ -1,7 +1,6 @@
 package org.esmartpoint.genesis.scripts;
 
 import java.util.HashMap;
-import java.util.List;
 
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
@@ -22,9 +21,9 @@ public class ElasticRidermoveGeneratorScript {
 	@Autowired DbHelper dbHelper;
 	
 	int MAX_USERS = 250000000;
-	int MAX_LUGARES = 100;
+	int MAX_LUGARES = 10000;
 	
-	String ridermoveElasticsearchUrl="http://localhost:9200/ridermove";
+	String ridermoveElasticsearchUrl="http://192.168.1.11:9200/ridermove";
 	
 	public ElasticRidermoveGeneratorScript() {
 		
@@ -46,15 +45,39 @@ public class ElasticRidermoveGeneratorScript {
 		httpHelper.post(ridermoveElasticsearchUrl + "/lugar", 
 			"{" + 
 				"\"settings\": {" + 
-				"	\"mapping.allow_type_wrapper\": true," + 
 			    "	\"number_of_shards\" : 1," + 
 	            "	\"number_of_replicas\" : 0" + 
 				"}" +
 			"}", "JSON");
 		
-		generateUsers();
+		//generateUsers();
+		generateLikes();
 		
 		dbHelper.closeConnection(null);
+	}
+	
+	private void generateLikes() throws Exception {
+		
+		WeightedItemSelector<Integer> likes =  new WeightedItemSelector<Integer>()
+			.add(10, 10)
+			.add(20, 20)
+			.add(30, 30)
+			.add(50, 40)
+			.add(10, 100)
+			.build();
+		
+		for(int i=0; i<MAX_LUGARES; i++) {
+			for(int j=0; j<likes.getNext(); j++) {
+				JSONObject body = new JSONObject();
+				body.put("id", i+1);
+				body.put("type", "entityLike");
+				
+				body.put("userId", generator.randomInt(1, MAX_USERS));
+				body.put("lugarId", "" + i);
+	
+				httpHelper.put(ridermoveElasticsearchUrl + "/entityLike/" + (i + 1) + "/_create", body.toString(), "JSON");
+			}
+		}
 	}
 	
 	private void generateUsers() throws Exception {
@@ -73,10 +96,10 @@ public class ElasticRidermoveGeneratorScript {
 			.add(5, "Other")
 			.build();
 		WeightedItemSelector<String> fileExtension =  new WeightedItemSelector<String>()
-				.add(75, "jpg")
-				.add(20, "png")
-				.add(5, "bmp")
-				.build();
+			.add(75, "jpg")
+			.add(20, "png")
+			.add(5, "bmp")
+			.build();
 		WeightedItemSelector<String> emailDomain =  new WeightedItemSelector<String>()
 			.add(10, "ridermove.com")
 			.add(30, "hotmail.com")
@@ -133,7 +156,7 @@ public class ElasticRidermoveGeneratorScript {
 
 			JSONObject body = new JSONObject();
 			body.put("id", i+1);
-			body.put("type", "user");
+			body.put("type", "lugar");
 			
 			JSONObject entity = new JSONObject();
 			entity.put("name", generator.randomTitle(10, 64, 2, 8));
@@ -199,9 +222,9 @@ public class ElasticRidermoveGeneratorScript {
 			body.put("browserType", browserType.getNext());
 			body.put("email", firstName.toLowerCase() + "." + lastName1.toLowerCase() + "@" + emailDomain.getNext());
 			body.put("password", "secret");
-			body.put("resumen", generator.randomParagraph(128, 500, 10, 64, 2, 8));
-			body.put("presentacionPersonal", generator.randomTitle(10, 50, 2, 8));
-			body.put("actionbarBackgroundColor", generator.randomHexNumeric(6));
+			//body.put("resumen", generator.randomParagraph(128, 500, 10, 64, 2, 8));
+			//body.put("presentacionPersonal", generator.randomTitle(10, 50, 2, 8));
+			//body.put("actionbarBackgroundColor", generator.randomHexNumeric(6));
 			
 			JSONArray servicios = new JSONArray();
 			servicioSelector.restart();

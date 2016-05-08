@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module xmlns="http://www.esmartpoint.com/schema/random-generator"
+	xmlns:db="http://www.esmartpoint.com/schema/db-random-generator">
+	
+	<input name="entityList"/>
+	<input name="userSelector" />
+	
+	<db:load var="entityClass">
+		select * from scd_classes where package_name='org.scd' and class_name='ScdPost'
+	</db:load>
+	
+	<selector var="parentFrecuency">
+		<item weight="20" value="null"/>
+		<item weight="80" from="1" to="5"/>
+		<item weight="30" from="6" to="10"/>
+		<item weight="3" from="10" to="50"/>
+	</selector>
+	
+	<selector var="rank">
+		<item weight="10" value="1"/>
+		<item weight="20" value="2"/>
+		<item weight="30" value="3"/>
+		<item weight="50" value="4"/>
+		<item weight="10" value="5"/>
+	</selector>
+	
+	<selector var="fileExtension">
+		<item weight="75" value="'jpg'"/>
+		<item weight="20" value="'png'"/>
+		<item weight="5" value="'bmp'"/>
+	</selector>
+	
+	<generate title="scd_entities\scd_entity_posts" 
+		var="postList" element="globals.secuences.scd_entities" type="child" source="entityList" parentFrecuency="parentFrecuency">
+		<set var="secuences" field="scd_entities" value="globals.secuences.scd_entities + 1" scope="global" />
+		
+		<set var="firstName" value="generator.randomFirstName()" />
+		<set var="lastName" value="generator.randomLastName()" />
+		<set var="createAt" value="generator.randomDate(new org.joda.time.DateTime(2000, 1,  1, 0, 0), new org.joda.time.DateTime(2014, 1,  1, 0, 0))" />
+		<set var="modifiedAt" value="generator.randomDate(createAt, new org.joda.time.DateTime().now())" />
+		<set var="lastLogonAt" value="generator.randomDate(createAt, modifiedAt)" />
+		
+		<set var="entity" type="java.util.HashMap">
+			<field name="entity_id" value="globals.secuences.scd_entities" />
+			<field name="name" value="generator.randomTitle(10, 64, 2, 8)" />
+			<field name="created_by" value="null" />
+			<field name="created_on" value="createAt.toDate()" />
+			<field name="entity_class_id" value="entityClass.id" />
+			<field name="rank" value="rank.getNext()" />
+			<field name="human_url_name" value="generator.toHumanURL(entity.name, 128)" />
+			<field name="is_deleted" value="generator.randomBoolean(90, 10)" />
+			<field name="modified_by" value="null" />
+			<field name="modified_on" value="createAt.toDate()" />
+			
+			<field name="num_comments" value="generator.randomInt(0, 1000)" />
+			<field name="num_documents" value="generator.randomInt(0, 1000)" />
+			<field name="num_evaluations" value="generator.randomInt(0, 1000)" />
+			<field name="num_likes" value="generator.randomInt(0, 1000)" />
+			<field name="num_nolikes" value="generator.randomInt(0, 1000)" />
+			<field name="num_members" value="generator.randomInt(0, 1000)" />
+			<field name="num_posts" value="generator.randomInt(0, 1000)" />
+			<field name="num_tasks" value="generator.randomInt(0, 1000)" />
+			<field name="num_visits" value="generator.randomInt(0, 1000)" />
+			<field name="num_notes" value="generator.randomInt(0, 1000)" />
+			<field name="num_followers" value="generator.randomInt(0, 1000)" />
+			<field name="num_questions" value="generator.randomInt(0, 1000)" />
+			<field name="num_suggests" value="generator.randomInt(0, 1000)" />
+		</set>
+		
+		<db:insert table="scd_entities" value="entity" />
+		
+		<set var="data" type="java.util.HashMap">
+			<field name="entity_id" value="parent" />
+			<field name="post_id" value="globals.secuences.scd_entities" />
+			<field name="resume" value="generator.randomParagraph(128, 500, 10, 64, 2, 8)" />
+			<field name="text" value="generator.randomText(128, 4096, '\r\n', 128, 500, 10, 64, 2, 8)" />
+			<field name="start_date" value="createAt.toDate()" />
+		</set>
+		
+		<db:insert table="scd_entity_posts" value="data" />
+		
+	</generate>
+	
+	<execute file="generate-likes.xml">
+		<input name="entityList" value="postList" />
+		<input name="userSelector" />
+	</execute>
+	
+	<execute file="generate-comments.xml">
+		<input name="entityList" value="postList" />
+		<input name="userSelector" />
+	</execute>
+
+</module>

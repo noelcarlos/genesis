@@ -176,7 +176,7 @@ public class DefaultCommandUnit implements IXMLCommandUnit {
 				
 				for(Element n: nodes) {
 					context.getXmlProccesor().setCurrentNode(n);
-					Object value = context.evaluateExpression(node, n.valueOf("@value"));
+					Object value = context.evaluateExpression(n, n.valueOf("@value"));
 					String property;
 					if (n.getName().equals("field")) 
 						property = n.valueOf("@name");
@@ -195,6 +195,8 @@ public class DefaultCommandUnit implements IXMLCommandUnit {
 					context.getGlobals().put(varName, record);
 				//context.setVariable(varName, record);
 			}
+		} catch(GenesisRuntimeException gre) {
+			throw gre;
 		} catch (Exception e) {
 			throw context.createExceptionForNode(e, context.getXmlProccesor().getCurrentNode());
 		}
@@ -277,6 +279,8 @@ public class DefaultCommandUnit implements IXMLCommandUnit {
 				items.build();
 				context.getVariables().put(varName, items);
 			}
+		} catch(GenesisRuntimeException gre) {
+			throw gre;
 		} catch(Exception exp) {
 			throw context.createExceptionForNode(exp, node);
 		}
@@ -331,6 +335,8 @@ public class DefaultCommandUnit implements IXMLCommandUnit {
 			if (varName != null) {
 				context.getVariables().put(varName, userList);
 			}
+		} catch(GenesisRuntimeException gre) {
+			throw gre;
 		} catch (Exception exp) {
 			throw context.createExceptionForNode(exp, node);
 		}

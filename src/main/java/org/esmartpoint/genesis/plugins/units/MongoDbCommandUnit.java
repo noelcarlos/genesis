@@ -1,6 +1,5 @@
 package org.esmartpoint.genesis.plugins.units;
 
-import org.codehaus.jettison.json.JSONObject;
 import org.dom4j.Element;
 import org.dom4j.Node;
 import org.esmartpoint.dbutil.Cronometro;
@@ -45,7 +44,9 @@ public class MongoDbCommandUnit implements IXMLCommandUnit {
 	@Override
 	public void cleanup(XMLProccesorContext context) {
 		// TODO Auto-generated method stub
-		mongoDbHelper.closeSession();
+		if (mongoDbHelper != null) {
+			mongoDbHelper.closeSession();
+		}
 	}
 	
 	private void commandInsert(XMLProccesorContext context, Element node) throws GenesisRuntimeException {

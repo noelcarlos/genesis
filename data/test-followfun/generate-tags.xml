@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module xmlns="http://www.esmartpoint.com/schema/random-generator"
+	xmlns:db="http://www.esmartpoint.com/schema/db-random-generator">
+	
+	<input name="entityList"/>
+	<input name="userSelector"/>
+	<input name="contextName"/>
+	
+	<selector var="parentFrecuency">
+		<item weight="80" from="1" to="5"/>
+	</selector>
+	
+	<selector var="tagSelector" weightNull="0" weightValue="100" >
+		<sql>
+			select ctg.id
+			from scd_tags ctg inner join scd_contexts cnt on ctg.context_id=cnt.context_id 
+			where cnt.name = '${contextName}'
+		</sql>
+	</selector>
+	
+	<generate title="scd_entities\scd_entity_tags" 
+		type="child" source="entityList" parentFrecuency="parentFrecuency">
+		
+		<set var="createAt" value="generator.randomDate(new org.joda.time.DateTime(2000, 1,  1, 0, 0), new org.joda.time.DateTime(2014, 1,  1, 0, 0))" />
+		
+		<set var="data" type="java.util.HashMap">
+			<field name="entity_id" value="parent" />
+			<field name="created_by_id" value="userSelector.getNext()" />
+			<field name="created_on" value="createAt.toDate()" />
+			<field name="tag_id" value="tagSelector.getNext()" />
+		</set>
+		
+		<db:insert table="scd_entity_tags" value="data" />
+		
+	</generate>
+	 
+</module>

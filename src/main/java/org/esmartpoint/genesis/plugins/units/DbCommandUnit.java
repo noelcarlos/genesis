@@ -61,13 +61,17 @@ public class DbCommandUnit implements IXMLCommandUnit {
 	@Transactional(readOnly = false)
 	private void commandLoad(XMLProccesorContext context, Element node) throws GenesisRuntimeException {
 		//context.setVariables(variables);
-		String varName = node.valueOf("@var");
-		String name = node.valueOf("@name");
-		String query = context.evaluateTemplate(node, node.getText());
-		Cronometro.start("DATABASE");
-		HashMap<String, Object> res = dbHelper.load(name, query, null);
-		Cronometro.stop("DATABASE");
-		context.getVariables().put(varName, res);
+		try {
+			String varName = node.valueOf("@var");
+			String name = node.valueOf("@name");
+			String query = context.evaluateTemplate(node, node.getText());
+			Cronometro.start("DATABASE");
+			HashMap<String, Object> res = dbHelper.load(name, query, null);
+			Cronometro.stop("DATABASE");
+			context.getVariables().put(varName, res);
+		} catch (Exception e) {
+			throw context.createExceptionForNode(e, node);
+		}
 		//context.setVariable(varName, res);
 	}
 	

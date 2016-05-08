@@ -56,7 +56,8 @@ public class GenesisApp
         	commandDispatcher.setupPlugins(null);
         	Stats.init();
 
-        	//HashMap<String, Object> input = new HashMap<String, Object>();
+        	HashMap<String, Object> input = new HashMap<String, Object>();
+        	xmlProccesor.execute("data/test-followfun/main.xml", input);
         	//xmlProccesor.execute("data/test-elasticsearch/main.xml", input);
         	//xmlProccesor.execute("data/test-mongodb/main.xml", input);
         	//Cronometro.trace();
@@ -64,8 +65,8 @@ public class GenesisApp
         	//ElasticRidermoveGeneratorScript script = springContext.getBean(ElasticRidermoveGeneratorScript.class);
         	//DBRidermoveGeneratorScript script = springContext.getBean(DBRidermoveGeneratorScript.class);
         	//MongoDbRidermoveGeneratorScript script = springContext.getBean(MongoDbRidermoveGeneratorScript.class);
-        	CouchbaseGeneratorScript script = springContext.getBean(CouchbaseGeneratorScript.class);
-        	script.run();
+        	//CouchbaseGeneratorScript script = springContext.getBean(CouchbaseGeneratorScript.class);
+        	//script.run();
 
 //        	System.out.println("EVALUATIONS operations took, " +  PeriodFormat.getDefault().print(new Period(Cronometro.get("EVALUATIONS").sum)));
 //        	System.out.println("DATABASE operations took, " +  PeriodFormat.getDefault().print(new Period(Cronometro.get("DATABASE").sum)));
@@ -87,8 +88,9 @@ public class GenesisApp
 			XMLProccesor xmlProccesor = e.getXmlProccesor();
 			GokuElement node = e.getElement();
 			while (xmlProccesor != null) {
-				System.err.println("\tat (" + node.getLineNumber() + "," + node.getColumnNumber() 
-					+ ") : " + xmlProccesor.getCurrentFile().getFile().getAbsolutePath());
+				String fileName = xmlProccesor.getCurrentFile().getFile().toString().replaceAll("\\\\", "/");
+				System.err.println("\tExecutionException: " + "/" + fileName    
+					+ " @" +  node.getLineNumber() + "," + node.getColumnNumber());
 				xmlProccesor = xmlProccesor.getParent();
 				if (xmlProccesor != null) {
 					node = (GokuElement)xmlProccesor.getCurrentNode();
