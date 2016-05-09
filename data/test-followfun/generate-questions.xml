@@ -21,7 +21,7 @@
 	</selector>
 	
 	<db:load var="entityClass">
-		select * from scd_classes where package_name='org.snm.core' and class_name='Question'
+		select * from scd_classes where package_name='org.scd' and class_name='ScdQuestion'
 	</db:load>
 	
 	<generate title="scd_entities\scd_entity_questions" 

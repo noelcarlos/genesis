@@ -18,8 +18,8 @@
 	 -->
 	 
 	<set var="DIALECT" value="'mysql'" scope="global"/>
-	<set var="MAX_USERS" value="50" />
-	<set var="MAX_LUGARES" value="20" />
+	<set var="MAX_USERS" value="50000" />
+	<set var="MAX_LUGARES" value="2000" />
 	
 	<def var="secuences" type="java.util.HashMap" scope="global" />
 	

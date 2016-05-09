@@ -228,4 +228,22 @@
 		<input name="userSelector" />
 	</execute>
 	
+	<execute file="generate-categories.xml">
+		<input name="entityList" value="userList" />
+		<input name="userSelector" />
+		<input name="contextName" value="'org.followfun.LkIdioma'"/>
+	</execute>
+	
+	<execute file="generate-categories.xml">
+		<input name="entityList" value="userList" />
+		<input name="userSelector" />
+		<input name="contextName" value="'org.followfun.LkCiudad'"/>
+	</execute>
+	
+	<execute file="generate-categories.xml">
+		<input name="entityList" value="userList" />
+		<input name="userSelector" />
+		<input name="contextName" value="'org.followfun.LkTipoEvento'"/>
+	</execute>
+	
 </module>

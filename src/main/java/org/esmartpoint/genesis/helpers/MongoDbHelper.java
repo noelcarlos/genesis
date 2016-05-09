@@ -21,7 +21,9 @@ public class MongoDbHelper {
 	}
 	
 	public void closeSession() {
-		client.close();
+		if (client != null) {
+			client.close();
+		}
 	}
 
 	public void insert(String collectionName, String body) throws Exception {

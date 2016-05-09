@@ -13,7 +13,7 @@
 	<selector var="categorySelector" weightNull="0" weightValue="100" >
 		<sql>
 			select ctg.category_id
-			from scd_categories ctg inner join scd_contexts cnt on ctg.context_id=cnt.context_id 
+			from scd_categories ctg inner join scd_classes cnt on ctg.entity_class_id=cnt.id 
 			where cnt.name = '${contextName}'
 		</sql>
 	</selector>

@@ -42,7 +42,7 @@
 	</selector>
 	
 	<db:load var="entityClass">
-		select * from scd_classes where package_name='org.followfun.Evento' and class_name='Evento'
+		select * from scd_classes where package_name='org.followfun' and class_name='Evento'
 	</db:load>
 	
 	<generate title="eventos" var="lugarList" element="globals.secuences.scd_entities" type="fixed" size="lugarCount">
@@ -84,21 +84,23 @@
 		
 		<db:insert table="scd_entities" value="entity" key="entity_id" />
 		
+		<set var="createAt" value="generator.randomDate(new org.joda.time.DateTime(2000, 1,  1, 0, 0), new org.joda.time.DateTime(2014, 1,  1, 0, 0))" />
+		
 		<set var="data" type="java.util.HashMap">
 			<field name="evento_id" value="globals.secuences.scd_entities" />
 			
-			<field name="description" value="generator.randomParagraph(128, 500, 10, 64, 2, 8)" />
-			<field name="is_seasonable" value="false" />
-			<field name="build_information" value="generator.randomParagraph(64, 128, 10, 64, 2, 8)" />
-			<field name="design_information" value="generator.randomParagraph(64, 128, 10, 64, 2, 8)" />
-			<field name="alternate_names" value="generator.randomTitle(10, 50, 2, 8)" />
-			<field name="location" value="generator.randomTitle(10, 50, 2, 8)" />
-			<field name="geo_location_x" value="generator.randomInt(0, 1000)" />
-			<field name="geo_location_y" value="generator.randomInt(0, 1000)" />
-			<field name="dimensiones" value="generator.randomInt(20, 1000)" />
-			<field name="horario" value="generator.randomTitle(10, 50, 2, 8)" />
-			<field name="servicios" value="generator.randomTitle(10, 50, 2, 8)" />
-			<field name="requisitos" value="generator.randomTitle(10, 50, 2, 8)" />
+			<field name="publicador_id" value="userSelector.getNext()" />
+			<field name="descripcion" value="generator.randomParagraph(128, 500, 10, 64, 2, 8)" />
+			<field name="fecha" value="createAt.toDate()" />
+			<field name="precio" value="generator.randomInt(20, 300)" />
+			<field name="horarios" value="generator.randomTitle(10, 50, 2, 8)" />
+			<field name="direccion" value="generator.randomTitle(10, 50, 2, 8)" />
+			<field name="lugar_lat" value="generator.randomInt(0, 1000)" />
+			<field name="lugar_lng" value="generator.randomInt(0, 1000)" />
+			
+			<field name="lk_tipo_evento_id" value="generator.randomInt(1, 9)" />
+			<field name="lk_idioma_id" value="generator.randomInt(1, 9)" />
+			<field name="lk_ciudad_id" value="generator.randomInt(10, 11)" />
 		</set>
 		
 		<db:insert table="eventos" value="data" />
@@ -106,7 +108,7 @@
 	</generate>
 	
 	<db:list var="lugarList" projectToMap="false">
-		select lugar_id from lugares
+		select evento_id from eventos
 	</db:list>
 	
 	<selector var="parentFrecuency">
@@ -132,33 +134,36 @@
 	<execute file="generate-categories.xml">
 		<input name="entityList" value="lugarList" />
 		<input name="userSelector" />
-		<input name="contextName" value="'ciudad'"/>
+		<input name="contextName" value="'org.followfun.LkIdioma'"/>
 	</execute>
 	
 	<execute file="generate-categories.xml">
 		<input name="entityList" value="lugarList" />
 		<input name="userSelector" />
-		<input name="contextName" value="'deporte'"/>
+		<input name="contextName" value="'org.followfun.LkCiudad'"/>
 	</execute>
 	
-	<execute file="generate-tags.xml">
+	<execute file="generate-categories.xml">
 		<input name="entityList" value="lugarList" />
 		<input name="userSelector" />
-		<input name="contextName" value="'lugar.servicio'"/>
+		<input name="contextName" value="'org.followfun.LkTipoEvento'"/>
 	</execute>
 	
-	<execute file="generate-tags.xml">
+	<!-- 	
+	<execute file="generate-categories.xml">
 		<input name="entityList" value="lugarList" />
 		<input name="userSelector" />
 		<input name="contextName" value="'lugar.requisito'"/>
 	</execute>
-	
+
 	<execute file="generate-tags.xml">
 		<input name="entityList" value="lugarList" />
 		<input name="userSelector" />
 		<input name="contextName" value="'lugar.tag'"/>
 	</execute>
+	 -->
 	
+	<!--  
 	<logic:if test="globals.DIALECT != 'postgresql'">
 		<db:script>
 			UPDATE lugares l INNER JOIN scd_entities x ON l.lugar_id = x.entity_id 
@@ -210,7 +215,8 @@
 			set x.tags = e.name;
 		</db:script>
 	</logic:if>
-		
+	 -->
+	 	
 	<execute file="generate-comments.xml">
 		<input name="entityList" value="lugarList" />
 		<input name="userSelector" />
