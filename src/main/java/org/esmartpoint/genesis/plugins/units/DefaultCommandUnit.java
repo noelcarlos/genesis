@@ -260,6 +260,13 @@ public class DefaultCommandUnit implements IXMLCommandUnit {
 					selector.build();
 					context.getVariables().put(varName, selector);
 				}
+			} else if (node.valueOf("*[local-name(.) = 'xmlFile']").length() > 0) {
+				String xmlFile = context.evaluateTemplate(node, node.valueOf("*[local-name(.) = 'xmlFile']"));
+				WeightedMapSelector<Object> selector = new WeightedMapSelector<Object>(
+					WeightedMapSelector.readFromXMLResource(xmlFile), 
+					Integer.parseInt(node.valueOf("@weightNull")), node.valueOf("@keyValue"), node.valueOf("@keyWeight"));
+				selector.build();
+				context.getVariables().put(varName, selector);
 			} else {
 				WeightedItemSelector<Object> items = new WeightedItemSelector<Object>();
 				List<Element> nodes = node.selectNodes("*");

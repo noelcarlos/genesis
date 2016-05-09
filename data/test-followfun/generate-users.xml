@@ -45,15 +45,11 @@
 	</db:load>
 	
 	<selector var="firstNameSelector" weightNull="0" keyValue="nombre" keyWeight="frecuencia" >
-		<sql>
-			SELECT * FROM datagen.src_nombres
-		</sql>
+		<xmlFile>data/resources/src_nombres.xml</xmlFile>
 	</selector>
 	
 	<selector var="lastNameSelector" weightNull="0" keyValue="apellido" keyWeight="frecuencia" >
-		<sql>
-			SELECT * FROM datagen.src_apellidos
-		</sql>
+		<xmlFile>data/resources/src_apellidos.xml</xmlFile>
 	</selector>
 	
 	<def var="entity" type="java.util.HashMap" />
