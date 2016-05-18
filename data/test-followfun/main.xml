@@ -18,8 +18,8 @@
 	 -->
 	 
 	<set var="DIALECT" value="'mysql'" scope="global"/>
-	<set var="MAX_USERS" value="50000" />
-	<set var="MAX_LUGARES" value="2000" />
+	<set var="MAX_USERS" value="100000" />
+	<set var="MAX_LUGARES" value="5000" />
 	
 	<def var="secuences" type="java.util.HashMap" scope="global" />
 	
@@ -45,30 +45,48 @@
 	
 	<logic:if test="globals.DIALECT == 'mysql'">
 		<db:script>
+			SET UNIQUE_CHECKS=0;
+			SET FOREIGN_KEY_CHECKS=0;
 			delete from scd_entities;
-			delete from scd_users;
-			delete from usuario_cuentas;
-			delete from usuario_detalles;
-			delete from usuario_direcciones;
-			delete from usuario_estudiantes;
-			delete from usuario_profesores;
-			delete from scd_user_roles;
-			delete from scd_archives;
-			delete from scd_entity_followers;
-			delete from scd_entity_tasks;
-			delete from eventos;
-			delete from scd_activities;
 			ALTER TABLE scd_entities AUTO_INCREMENT=1;
+			delete from scd_entity_albums;
+			ALTER TABLE scd_entity_albums AUTO_INCREMENT=1;
+			delete from scd_entity_album_items;
+			ALTER TABLE scd_entity_album_items AUTO_INCREMENT=1;
+			delete from scd_entity_categories;
+			ALTER TABLE scd_entity_categories AUTO_INCREMENT=1;
+			delete from scd_entity_comments;
+			ALTER TABLE scd_entity_comments AUTO_INCREMENT=1;
+			delete from scd_entity_evaluations;
+			ALTER TABLE scd_entity_evaluations AUTO_INCREMENT=1;
+			delete from scd_users;
 			ALTER TABLE scd_users AUTO_INCREMENT=1;
+			delete from usuario_cuentas;
 			ALTER TABLE usuario_cuentas AUTO_INCREMENT=1;
+			delete from usuario_detalles;
 			ALTER TABLE usuario_detalles AUTO_INCREMENT=1;
+			delete from usuario_direcciones;
 			ALTER TABLE usuario_direcciones AUTO_INCREMENT=1;
+			delete from usuario_estudiantes;
 			ALTER TABLE usuario_estudiantes AUTO_INCREMENT=1;
+			delete from usuario_profesores;
 			ALTER TABLE usuario_profesores AUTO_INCREMENT=1;
-			ALTER TABLE scd_archives AUTO_INCREMENT=1;
+			delete from scd_user_roles;
 			ALTER TABLE scd_user_roles AUTO_INCREMENT=1;
+			delete from scd_archives;
+			ALTER TABLE scd_archives AUTO_INCREMENT=1;
+			delete from scd_entity_followers;
+			ALTER TABLE scd_entity_followers AUTO_INCREMENT=1;
+			delete from scd_entity_tasks;
+			ALTER TABLE scd_entity_tasks AUTO_INCREMENT=1;
+			delete from eventos;
 			ALTER TABLE eventos AUTO_INCREMENT=1;
+			delete from scd_activities;
 			ALTER TABLE scd_activities AUTO_INCREMENT=1;
+			delete from scd_entity_posts;
+			ALTER TABLE scd_entity_posts AUTO_INCREMENT=1;
+			SET FOREIGN_KEY_CHECKS=1;
+			SET UNIQUE_CHECKS=1;
 		</db:script>	
 	</logic:if>
 		

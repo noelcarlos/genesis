@@ -27,17 +27,17 @@ import org.esmartpoint.dbutil.db.metadata.TableInfoPK;
 
 public class DAOBase {
 	private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DAOBase.class);
-	private static ThreadLocal<Connection> conn = new ThreadLocal<Connection>();
-	private static boolean cacheFullMetadata = false;
-	private static String dialect = "";
-	public final static String DIALECT_POSTGRES = "postgres";
-	public final static String DIALECT_MYSQL = "mysql";
-	private static String schemaName = null;
+	private ThreadLocal<Connection> conn = new ThreadLocal<Connection>();
+	private boolean cacheFullMetadata = false;
+	private String dialect = "";
+	public static final String DIALECT_POSTGRES = "postgres";
+	public static final String DIALECT_MYSQL = "mysql";
+	private String schemaName = null;
 	
-	private DAOBase() {
+	public DAOBase() {
 	}
 	
-	static public void beginTransaction(String db) throws SQLException {
+	public void beginTransaction(String db) throws SQLException {
 		Context init;
 		try {
 			init = new InitialContext();
@@ -56,7 +56,7 @@ public class DAOBase {
 		}
 	}
 	
-	static public void initConnection(Connection con) throws SQLException {
+	public void initConnection(Connection con) throws SQLException {
 		conn.set(con);
 		if (getMetadata().getTables().size() == 0 && isCacheFullMetadata()) {
 			if (dialect.equals(DIALECT_MYSQL))
@@ -66,12 +66,12 @@ public class DAOBase {
 		}
 	}
 	
-	static public void cacheAllMetadata(String schemaPattern) throws SQLException {
+	public void cacheAllMetadata(String schemaPattern) throws SQLException {
 		if (getMetadata().getTables().size() == 0)
 			leerMetaData(getMetadata(), schemaPattern, "%");
 	}
 	
-	static public void beginTransaction() throws SQLException {
+	public void beginTransaction() throws SQLException {
 		if (getMetadata().getTables().size() == 0 && isCacheFullMetadata()) {
 			if (dialect.equals(DIALECT_MYSQL))
 				cacheAllMetadata(null);
@@ -81,11 +81,11 @@ public class DAOBase {
 		getConnection().setAutoCommit(false);
 	}
 	
-	static public void commit() throws SQLException {
+	public void commit() throws SQLException {
 		getConnection().commit();
 	}
 	
-	static public void rollback() {
+	public void rollback() {
 		try {
 			getConnection().rollback();
 		} catch (SQLException e) {
@@ -93,23 +93,23 @@ public class DAOBase {
 		}
 	}
 	
-	static public Connection openConnection() throws SQLException {
+	public Connection openConnection() throws SQLException {
 		return conn.get();
 	}
 	
-	public static NamedParameterStatement createQuery(String sql) throws SQLException {
+	public NamedParameterStatement createQuery(String sql) throws SQLException {
 		openConnection();
 		NamedParameterStatement nps = new NamedParameterStatement(getConnection(), sql);
 		return nps;
 	}
 
-	static Document doc = null;
+	Document doc = null;
 	
-	static public Document getNamedQueriesDocument() {
+	public Document getNamedQueriesDocument() {
 		return doc;
 	}
 	
-	static public Document initializeFromResource(String resourceName) throws SQLException {
+	public Document initializeFromResource(String resourceName) throws SQLException {
 		if (doc == null) {
 			try {
 				doc = DocumentHelper.parseText(Utility.loadTextResource(resourceName));
@@ -122,7 +122,7 @@ public class DAOBase {
 		return doc;
 	}
 	
-	static public Document loadNamedQueryResources(String resourceName) throws SQLException {
+	public Document loadNamedQueryResources(String resourceName) throws SQLException {
 		try {
 			if (ResourceLoaderService.reloadingRequired(resourceName)) {
 				doc = DocumentHelper.parseText(ResourceLoaderService.loadTextFile(resourceName));
@@ -135,7 +135,7 @@ public class DAOBase {
 		}
 	}
 
-	public static String loadNamedQuery(String queryName) throws SQLException {
+	public String loadNamedQuery(String queryName) throws SQLException {
 		Node n = doc.selectSingleNode("//queries/query[@name='" + queryName + 
 				"' and (not (@dialect) or @dialect='" + dialect + "')]");
 		if (n == null)
@@ -143,7 +143,7 @@ public class DAOBase {
 		return n.getText();
 	}
 	
-	public static String loadNamedESMapping(String mappingName) throws SQLException {
+	public String loadNamedESMapping(String mappingName) throws SQLException {
 		Node n = doc.selectSingleNode("//queries/esMapping[@name='" + mappingName + 
 				"' and (not (@dialect) or @dialect='" + dialect + "')]");
 		if (n == null)
@@ -151,7 +151,7 @@ public class DAOBase {
 		return n.getText();
 	}
 	
-	public static NamedParameterStatement createNamedQuery(String queryName) throws SQLException {
+	public NamedParameterStatement createNamedQuery(String queryName) throws SQLException {
 		openConnection();
 		String sql = loadNamedQuery(queryName); 
 		logger.debug("NamedQuery [" + queryName + "]");
@@ -159,7 +159,7 @@ public class DAOBase {
 		return nps;
 	}
 	
-	static public void closeTransaction() {
+	public void closeTransaction() {
 		try {
 			if (getConnection() != null) {
 				getConnection().close();
@@ -170,20 +170,20 @@ public class DAOBase {
 		}
 	}
 	
-	static public Connection getConnection() {
+	public Connection getConnection() {
 		return conn.get();
 	}
 	
-	private static MetaDataInfo metadata = new MetaDataInfo();
+	MetaDataInfo metadata = new MetaDataInfo();
 	
-	static public TableInfo getTableInfo(String tableName) throws SQLException {
+	public TableInfo getTableInfo(String tableName) throws SQLException {
 		if (getMetadata().getTables().get(tableName) == null)
 			leerMetaData(getMetadata(), getSchemaName(), tableName);
 		return getMetadata().getTables().get(tableName);
 	}	
 	
 	// tableNamePattern = "%"
-	static public void leerMetaData(MetaDataInfo tables, String schemaPattern, String tableNamePattern) throws SQLException {
+	public void leerMetaData(MetaDataInfo tables, String schemaPattern, String tableNamePattern) throws SQLException {
     	Cronometro.start("es.afu.util.NamedParameterStatement.DBQUERY");
 		DatabaseMetaData md = openConnection().getMetaData();
 		
@@ -340,28 +340,28 @@ public class DAOBase {
 		Cronometro.stop("es.afu.util.NamedParameterStatement.DBQUERY");
 	}
 	
-	static public Record load(String entityName, Integer id) throws SQLException {
+	public Record load(String entityName, Integer id) throws SQLException {
 		TableInfo info = getTableInfo(entityName);
-		return DAOBase.createQuery("SELECT * FROM " + entityName + 
+		return createQuery("SELECT * FROM " + entityName + 
 				" WHERE " + info.getPrimaryKey() + "=:" + info.getPrimaryKey())
 			.setParameter(info.getPrimaryKey().toString(), id)
 			.uniqueResult();
 	}
 	
-	static public List<Record> list(String entityName) throws SQLException {
-		return DAOBase.createQuery("SELECT * FROM " + entityName)
+	public List<Record> list(String entityName) throws SQLException {
+		return createQuery("SELECT * FROM " + entityName)
 			.list();
 	}
 	
-	static public List<Record> list(String entityName, String key, Integer id) throws SQLException {
-		return DAOBase.createQuery("SELECT * FROM " + entityName + " WHERE " + key + "=:id")
+	public List<Record> list(String entityName, String key, Integer id) throws SQLException {
+		return createQuery("SELECT * FROM " + entityName + " WHERE " + key + "=:id")
 			.setParameter("id", id)
 			.list();
 	}
 	
-	static public void delete(String entityName, Integer id) throws SQLException {
+	public void delete(String entityName, Integer id) throws SQLException {
 		TableInfo info = getTableInfo(entityName);
-		DAOBase.createQuery("DELETE FROM " + entityName + 
+		createQuery("DELETE FROM " + entityName + 
 				" WHERE " + info.getPrimaryKey() + "=:" + info.getPrimaryKey())
 			.setParameter(info.getPrimaryKey().toString(), id)
 			.executeUpdate();
@@ -371,7 +371,7 @@ public class DAOBase {
 	//Hay que detectar si el campo llave es autonumerico o no, en caso de que no sea autonumerico no se puede generar, por lo que es 
 	//Obligatorio como campo de entrada. ¿Como se detecta entonces si es insert o update si antes se hacia cuando eran nulls las 
 	//llaves y ahora no pueden serlo?
-	static public Integer save(String entityName, Record r) throws SQLException {
+	public Integer save(String entityName, Record r) throws SQLException {
 		NamedParameterStatement q;
 		StringBuilder sql;
 		
@@ -424,7 +424,7 @@ public class DAOBase {
 			}
 			sql.append(" WHERE " + info.getPrimaryKey() + "=:" + info.getPrimaryKey());
 		}
-		q = DAOBase.createQuery(sql.toString());
+		q = createQuery(sql.toString());
 		for(int i = 0; i < fields.size(); i++) 
 			//if (id == null || (id != null && fields.get(i).get("isPK").equals(false))) 
 				if (record.containsKey(fields.get(i).getName()))
@@ -437,13 +437,13 @@ public class DAOBase {
 			return id;
 	}
 	
-	static private String buildDetail(String entityName) throws SQLException {
+	private String buildDetail(String entityName) throws SQLException {
 		StringBuilder selectPart = new StringBuilder();
 		StringBuilder fromPart = new StringBuilder();
 		return buildDetail(entityName, selectPart, fromPart);
 	}
 	
-	static private String buildDetail(String entityName, StringBuilder selectPart, StringBuilder fromPart) throws SQLException {
+	private String buildDetail(String entityName, StringBuilder selectPart, StringBuilder fromPart) throws SQLException {
 		TableInfo info = getTableInfo(entityName);
 		selectPart.append("this.*");
 		fromPart.append(entityName + " this");
@@ -483,72 +483,55 @@ public class DAOBase {
 		return "SELECT " + selectPart + " FROM " + fromPart;
 	}
 
-	static public Record loadDetail(String entityName, Integer id) throws SQLException {
+	public Record loadDetail(String entityName, Integer id) throws SQLException {
 		TableInfo info = getTableInfo(entityName);
-		return DAOBase.createQuery(buildDetail(entityName) + 
+		return createQuery(buildDetail(entityName) + 
 				" WHERE this." + info.getPrimaryKey() + "=:" + info.getPrimaryKey())
 			.setParameter(info.getPrimaryKey(), id)
 			.uniqueResult();
 	}
 
-	static public List<Record> listDetail(String entityName, Integer id) throws SQLException {
+	public List<Record> listDetail(String entityName, Integer id) throws SQLException {
 		TableInfo info = getTableInfo(entityName);
-		return DAOBase.createQuery(buildDetail(entityName) + 
+		return createQuery(buildDetail(entityName) + 
 				" WHERE this." + info.getPrimaryKey() + "=:" + info.getPrimaryKey())
 				.setParameter(info.getPrimaryKey(), id)
 			.list();
 	}
-	
-	static public Criteria createCriteriaDetail(String entityName) throws SQLException {
-		StringBuilder selectPart = new StringBuilder();
-		StringBuilder fromPart = new StringBuilder();
-		buildDetail(entityName, selectPart, fromPart);
-		Criteria c = new Criteria(selectPart.toString(), fromPart.toString());
-		c.setRootEntity(entityName);
-		return c;
-	}
-	
-	static public Criteria createCriteria(String entityName) throws SQLException {
-		return new Criteria(entityName);
+
+	public void setConnection(Connection conn) {
+		this.conn.set(conn); 
 	}
 
-	static public Criteria createNamedCriteria(String namedCriteria) throws SQLException {
-		return new Criteria(DAOBase.getConnection(), namedCriteria);
+	public void setCacheFullMetadata(boolean cacheFullMetadata) {
+		this.cacheFullMetadata = cacheFullMetadata;
 	}
 
-	public static void setConnection(Connection conn) {
-		DAOBase.conn.set(conn); 
-	}
-
-	public static void setCacheFullMetadata(boolean cacheFullMetadata) {
-		DAOBase.cacheFullMetadata = cacheFullMetadata;
-	}
-
-	public static boolean isCacheFullMetadata() {
+	public boolean isCacheFullMetadata() {
 		return cacheFullMetadata;
 	}
 
-	public static void setDialect(String dialect) {
-		DAOBase.dialect = dialect;
+	public void setDialect(String dialect) {
+		this.dialect = dialect;
 	}
 
-	public static String getDialect() {
+	public String getDialect() {
 		return dialect;
 	}
 
-	public static void setMetadata(MetaDataInfo metadata) {
-		DAOBase.metadata = metadata;
+	public void setMetadata(MetaDataInfo metadata) {
+		this.metadata = metadata;
 	}
 
-	public static MetaDataInfo getMetadata() {
+	public MetaDataInfo getMetadata() {
 		return metadata;
 	}
 
-	public static void setSchemaName(String schemaName) {
-		DAOBase.schemaName = schemaName;
+	public void setSchemaName(String schemaName) {
+		this.schemaName = schemaName;
 	}
 
-	public static String getSchemaName() {
+	public String getSchemaName() {
 		return schemaName;
 	}
 	

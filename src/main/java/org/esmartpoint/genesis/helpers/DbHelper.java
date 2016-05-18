@@ -37,6 +37,7 @@ public class DbHelper {
 		private EntityManagerFactory entityManagerFactory;
 		private Transaction transaction;
 		private String dialect;
+		private DAOBase daoBase;
 		
 		public ConnectionInfo(EntityManagerFactory entityManagerFactory, EntityManager entityManager, Transaction transaction, String dialect) {
 			super();
@@ -68,6 +69,12 @@ public class DbHelper {
 		}
 		public void setDialect(String dialect) {
 			this.dialect = dialect;
+		}
+		public DAOBase getDAOBase() {
+			return daoBase;
+		}
+		public void setDAOBase(DAOBase daoBase) {
+			this.daoBase = daoBase;
 		}
 	};
 	
@@ -113,14 +120,15 @@ public class DbHelper {
 		return res;
 	}
 	
-	protected void readSchemaDefinitions(String name) {
+	protected void readSchemaDefinitions(final String name) {
 		getSession(name).doWork(new Work() {
 		    @Override
 		    public void execute(Connection connection) throws SQLException {
 		        //connection, finally!
-		    	DAOBase.setDialect(DAOBase.DIALECT_POSTGRES);
-		    	DAOBase.setCacheFullMetadata(true);
-		    	DAOBase.initConnection(connection);
+				DAOBase daoBase = connectionMap.get(name).getDAOBase(); 
+				daoBase.setDialect(DAOBase.DIALECT_POSTGRES);
+				daoBase.setCacheFullMetadata(true);
+				daoBase.initConnection(connection);
 		    }
 		});
 	}
@@ -130,8 +138,9 @@ public class DbHelper {
 		if (StringUtils.isEmpty(name)) {
 			name = "default";
 		}
+		DAOBase daoBase = connectionMap.get(name).getDAOBase(); 
 		
-    	TableInfo ti = DAOBase.getMetadata().getTables().get(entityName);
+    	TableInfo ti = daoBase.getMetadata().getTables().get(entityName);
 		
 		buf.append(entityName);
 		buf.append("(");
@@ -152,7 +161,11 @@ public class DbHelper {
 				throw new Exception("Field [" + key + "] not found in [" + entityName + "] table.");
 			String typeName = fieldInfo.getTypeName();
 			if (typeName.equals("bit")) {
-				buf.append(":" + key);
+				buf.append(":" + key); 
+			} else if (typeName.equals("json") || typeName.equals("jsonb")) {
+				//buf.append("to_json(:" + key + ")");
+				//buf.append("to_json(:" + key + ")::jsonb");
+				buf.append("cast(:" + key + " as jsonb)");
 			} else {
 				buf.append(":" + key);
 			}
@@ -192,7 +205,15 @@ public class DbHelper {
 					} else
 						query.setInteger(key, (int)v);
 				}
-			} else {
+			} /*else if (typeName.equals("jsonb")) {
+				if (v == null)
+					query.setParameter(key, null);
+				else {
+					query.setParameter(key, ((Boolean)v) ? true : false, BooleanType.INSTANCE);
+					} else
+						query.setInteger(key, (int)v);
+				}
+			} */else {
 				query.setParameter(key, v);
 			}
 		}
@@ -247,12 +268,14 @@ public class DbHelper {
 		EntityManager em = (EntityManager) emf.createEntityManager();
 		
 		ConnectionInfo con = new ConnectionInfo(emf, em, null, dialect);
+		con.setDAOBase(new DAOBase());
+		
 		if (StringUtils.isEmpty(name)) {
 			name = "default";
 		}
 		
 		connectionMap.put(name, con);
-		readSchemaDefinitions(null);
+		readSchemaDefinitions(name);
 		
     	return con;
 	}
@@ -272,7 +295,7 @@ public class DbHelper {
 		if (StringUtils.isEmpty(name)) {
 			name = "default";
 		}
-		connectionMap.get(name).getTransaction().commit();;
+		connectionMap.get(name).getTransaction().commit();
 	}
 	
 	public void rollback(String name) {

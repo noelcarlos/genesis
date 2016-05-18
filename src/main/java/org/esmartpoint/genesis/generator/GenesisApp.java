@@ -13,6 +13,7 @@ import org.esmartpoint.genesis.scripts.CouchbaseGeneratorScript;
 import org.esmartpoint.genesis.scripts.DBRidermoveGeneratorScript;
 import org.esmartpoint.genesis.scripts.ElasticRidermoveGeneratorScript;
 import org.esmartpoint.genesis.scripts.MongoDbRidermoveGeneratorScript;
+import org.esmartpoint.genesis.scripts.PostgresqlGeneratorScript;
 import org.esmartpoint.genesis.util.ApplicationContextHolder;
 import org.esmartpoint.genesis.util.GenesisRuntimeException;
 import org.esmartpoint.genesis.util.GokuElement;
@@ -56,8 +57,9 @@ public class GenesisApp
         	commandDispatcher.setupPlugins(null);
         	Stats.init();
 
-        	HashMap<String, Object> input = new HashMap<String, Object>();
-        	xmlProccesor.execute("data/test-followfun/main.xml", input);
+        	//HashMap<String, Object> input = new HashMap<String, Object>();
+        	//xmlProccesor.execute("data/test-followfun/main.xml", input);
+
         	//xmlProccesor.execute("data/test-elasticsearch/main.xml", input);
         	//xmlProccesor.execute("data/test-mongodb/main.xml", input);
         	//Cronometro.trace();
@@ -66,7 +68,8 @@ public class GenesisApp
         	//DBRidermoveGeneratorScript script = springContext.getBean(DBRidermoveGeneratorScript.class);
         	//MongoDbRidermoveGeneratorScript script = springContext.getBean(MongoDbRidermoveGeneratorScript.class);
         	//CouchbaseGeneratorScript script = springContext.getBean(CouchbaseGeneratorScript.class);
-        	//script.run();
+        	PostgresqlGeneratorScript script = springContext.getBean(PostgresqlGeneratorScript.class);
+        	script.run();
 
 //        	System.out.println("EVALUATIONS operations took, " +  PeriodFormat.getDefault().print(new Period(Cronometro.get("EVALUATIONS").sum)));
 //        	System.out.println("DATABASE operations took, " +  PeriodFormat.getDefault().print(new Period(Cronometro.get("DATABASE").sum)));

@@ -1,13 +1,11 @@
 package org.esmartpoint.genesis.scripts;
 
 import java.util.HashMap;
-import java.util.List;
 
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
 import org.esmartpoint.genesis.helpers.DbHelper;
 import org.esmartpoint.genesis.helpers.GeneratorHelper;
-import org.esmartpoint.genesis.helpers.MongoDbHelper;
 import org.esmartpoint.genesis.selectors.WeightedEntitySelector;
 import org.esmartpoint.genesis.selectors.WeightedItemSelector;
 import org.esmartpoint.genesis.selectors.WeightedMapSelector;
@@ -16,15 +14,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class MongoDbRidermoveGeneratorScript {
+public class PostgresqlGeneratorScript {
 	@Autowired GeneratorHelper generator;
 	@Autowired DbHelper dbHelper;
-	@Autowired MongoDbHelper mongoDbHelper;
 	
 	int MAX_USERS = 200000000;
 	int MAX_LUGARES = 100;
 	
-	public MongoDbRidermoveGeneratorScript() {
+	public PostgresqlGeneratorScript() {
 		
 	}
 	
@@ -33,20 +30,21 @@ public class MongoDbRidermoveGeneratorScript {
 	}
 	
 	private void generateMain() throws Exception {
-//		dbHelper.createConnection(null, "org.postgresql.Driver", 
-//			"jdbc:postgresql://localhost:5432/ridermove?charSet=UTF8", 
-//			"wwwwww", "postgres", "org.hibernate.dialect.PostgreSQLDialect");
 		dbHelper.createConnection(null, "com.mysql.jdbc.Driver", 
 				"jdbc:mysql://localhost:3306/ridermove-test?charSet=UTF8", 
 				"wwwwww", "root", "org.hibernate.dialect.MySQL5InnoDBDialect");
-		
-		mongoDbHelper.openSession("192.168.1.11", 27017, "allianz");
 
+		dbHelper.createConnection("target", "org.postgresql.Driver", 
+			"jdbc:postgresql://localhost:5432/ridermove?charSet=UTF8", 
+			"wwwwww", "postgres", "org.hibernate.dialect.PostgreSQLDialect");
+		
 		//mongoDbHelper.dropCollection("users");
+		
+		dbHelper.begin("target");
 		
 		generateUsers();
 
-		mongoDbHelper.closeSession();
+		dbHelper.closeConnection("target");
 		
 		dbHelper.closeConnection(null);
 	}
@@ -233,7 +231,12 @@ public class MongoDbRidermoveGeneratorScript {
 			}
 			body.put("locations", locations);
 			
-			mongoDbHelper.insert("users", body.toString());
+			HashMap<String, Object> values = new HashMap<String, Object>();
+			
+			//values.put("id", i+1);
+			values.put("document", body.toString());
+			
+			dbHelper.insert("target", "users", values , null);
 		}
 	}
 }
