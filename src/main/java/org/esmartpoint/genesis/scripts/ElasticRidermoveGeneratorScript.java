@@ -20,10 +20,10 @@ public class ElasticRidermoveGeneratorScript {
 	@Autowired HttpHelper httpHelper;
 	@Autowired DbHelper dbHelper;
 	
-	int MAX_USERS = 250000000;
+	int MAX_USERS = 200000000;
 	int MAX_LUGARES = 10000;
 	
-	String ridermoveElasticsearchUrl="http://192.168.1.11:9200/ridermove";
+	String ridermoveElasticsearchUrl="http://192.168.1.9:9200/ridermove";
 	
 	public ElasticRidermoveGeneratorScript() {
 		
@@ -50,8 +50,8 @@ public class ElasticRidermoveGeneratorScript {
 				"}" +
 			"}", "JSON");
 		
-		//generateUsers();
-		generateLikes();
+		generateUsers();
+		//generateLikes();
 		
 		dbHelper.closeConnection(null);
 	}

@@ -1,34 +1,28 @@
 package org.esmartpoint.genesis.scripts;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.HashMap;
-import java.util.concurrent.TimeUnit;
+import java.util.Locale;
 
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
-import org.esmartpoint.genesis.generator.GenesisApp;
 import org.esmartpoint.genesis.helpers.DbHelper;
 import org.esmartpoint.genesis.helpers.GeneratorHelper;
 import org.esmartpoint.genesis.helpers.HttpHelper;
+import org.esmartpoint.genesis.output.provider.IDataRepository;
 import org.esmartpoint.genesis.selectors.WeightedEntitySelector;
 import org.esmartpoint.genesis.selectors.WeightedItemSelector;
 import org.esmartpoint.genesis.selectors.WeightedMapSelector;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
-import org.joda.time.format.PeriodFormat;
+import org.joda.time.format.PeriodFormatter;
+import org.joda.time.format.PeriodFormatterBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.couchbase.client.java.Bucket;
-import com.couchbase.client.java.Cluster;
-import com.couchbase.client.java.CouchbaseCluster;
-import com.couchbase.client.java.document.JsonDocument;
-import com.couchbase.client.java.document.RawJsonDocument;
-import com.couchbase.client.java.document.json.JsonObject;
-import com.couchbase.client.java.query.N1qlQuery;
-import com.couchbase.client.java.query.N1qlQueryResult;
-
 @Service
-public class CouchbaseGeneratorScript {
+public class UserGeneratorScript {
 	@Autowired GeneratorHelper generator;
 	@Autowired HttpHelper httpHelper;
 	@Autowired DbHelper dbHelper;
@@ -37,16 +31,34 @@ public class CouchbaseGeneratorScript {
 	//int MAX_USERS = 250;
 	int MAX_LUGARES = 100;
 	
-	Cluster cluster;
-	Bucket bucket;
+	IDataRepository repository;
 	
-	public CouchbaseGeneratorScript() {
-		
+	static DateTime start;
+	static DateTime last;
+	static long operationsCounter;
+	static long lastOperationCounter;
+	static long operationsBufferSize;
+	
+	DecimalFormat longIntegerFormat = (DecimalFormat)NumberFormat.getNumberInstance(new Locale("es", "es"));
+	
+	PeriodFormatter formatter = new PeriodFormatterBuilder()
+	    .appendDays().appendSuffix(" days ")
+	    .appendHours().appendSuffix(" hours ")
+	    .appendMinutes().appendSuffix(" minutes ")
+	    .appendSeconds().appendSuffix(" seconds ")
+	    .appendWeeks().appendSuffix(" weeks ")
+	    .printZeroNever()
+	    .toFormatter();
+	
+	public UserGeneratorScript() {
+		start = DateTime.now();
+    	last = start;
+    	operationsCounter = 0;
+    	lastOperationCounter = 0;
+    	operationsBufferSize = 1000;
 	}
 	
 	public void run() throws Exception {
-		cluster = CouchbaseCluster.create("192.168.1.9");
-		bucket = cluster.openBucket("allianz");
 
 //    	DateTime start = DateTime.now();
 //    	for (int i = 0; i < 1000; i++) {
@@ -55,13 +67,13 @@ public class CouchbaseGeneratorScript {
 //    	}
 //    	System.out.println("Terminado en, " + PeriodFormat.getDefault().print(new Period(start, DateTime.now())));
 		
-		bucket.bucketManager().createPrimaryIndex("primary", true, false);
-		bucket.bucketManager().createIndex("id", true, false, "id");
-		bucket.bucketManager().createIndex("type", true, false, "type");
+//		bucket.bucketManager().createPrimaryIndex("primary", true, false);
+//		bucket.bucketManager().createIndex("id", true, false, "id");
+//		bucket.bucketManager().createIndex("type", true, false, "type");
 //
 		generateMain();
 		
-		cluster.disconnect();
+//		cluster.disconnect();
 
 	}
 	
@@ -106,10 +118,10 @@ public class CouchbaseGeneratorScript {
 			.add(5, "Other")
 			.build();
 		WeightedItemSelector<String> fileExtension =  new WeightedItemSelector<String>()
-				.add(75, "jpg")
-				.add(20, "png")
-				.add(5, "bmp")
-				.build();
+			.add(75, "jpg")
+			.add(20, "png")
+			.add(5, "bmp")
+			.build();
 		WeightedItemSelector<String> emailDomain =  new WeightedItemSelector<String>()
 			.add(10, "ridermove.com")
 			.add(30, "hotmail.com")
@@ -273,23 +285,32 @@ public class CouchbaseGeneratorScript {
 			}
 			body.put("requisitos", requisitos);
 			
-			while (true) {
-				try {
-					bucket.upsert(RawJsonDocument.create("" + (i+1), body.toString()));
-					//bucket.upsert(JsonDocument.create("" + (i+1), JsonObject.fromJson(body.toString())));
-					break;
-				} catch (com.couchbase.client.java.error.TemporaryFailureException toofast) {
-					System.out.println("Retrying element:" + i);
-					Thread.sleep(100);
-				} catch (RuntimeException tooslow) {
-					if (tooslow.getCause() instanceof java.util.concurrent.TimeoutException) {
-						System.out.println("Time out retrying element:" + i);
-						Thread.sleep(100);
-					} else {
-						
-					}
-				}
-			}
+			repository.save(body);
+			
+			printStats();			
 		}
+	}
+
+	protected void printStats() {
+		operationsCounter++;
+		lastOperationCounter++;
+		
+		if (operationsCounter % operationsBufferSize == 0) {
+			DateTime span = DateTime.now().minus(start.getMillis());
+			DateTime lastSpan = DateTime.now().minus(last.getMillis());
+			long diff = span.getMillis();
+			long diffSpan = lastSpan.getMillis(); 
+			Period period = new Period(start, DateTime.now());
+
+			System.out.println("Inserted:" + longIntegerFormat.format(operationsCounter) + " items in: " + formatter.print(period));
+			System.out.println("Overall speed: " + (long)(operationsCounter / (diff / 1000.0)) 
+				+ " opers/sec current speed: " + (long)(lastOperationCounter / (diffSpan / 1000.0)) + " opers/sec");
+			last = DateTime.now();
+			lastOperationCounter = 0;
+		}
+	}
+
+	public void setDataRepository(IDataRepository repository) {
+		this.repository = repository;
 	}
 }

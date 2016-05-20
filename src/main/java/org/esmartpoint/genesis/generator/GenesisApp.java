@@ -3,6 +3,11 @@ package org.esmartpoint.genesis.generator;
 import java.util.HashMap;
 
 import org.esmartpoint.dbutil.Cronometro;
+import org.esmartpoint.genesis.output.provider.CouchbaseRepositoryProvider;
+import org.esmartpoint.genesis.output.provider.CouchbaseRepositorySettings;
+import org.esmartpoint.genesis.output.provider.FileSystemRepositoryProvider;
+import org.esmartpoint.genesis.output.provider.FileSystemRepositorySettings;
+import org.esmartpoint.genesis.output.provider.IDataRepository;
 import org.esmartpoint.genesis.plugins.CommandDispatcher;
 import org.esmartpoint.genesis.plugins.units.DbCommandUnit;
 import org.esmartpoint.genesis.plugins.units.DefaultCommandUnit;
@@ -14,6 +19,7 @@ import org.esmartpoint.genesis.scripts.DBRidermoveGeneratorScript;
 import org.esmartpoint.genesis.scripts.ElasticRidermoveGeneratorScript;
 import org.esmartpoint.genesis.scripts.MongoDbRidermoveGeneratorScript;
 import org.esmartpoint.genesis.scripts.PostgresqlGeneratorScript;
+import org.esmartpoint.genesis.scripts.UserGeneratorScript;
 import org.esmartpoint.genesis.util.ApplicationContextHolder;
 import org.esmartpoint.genesis.util.GenesisRuntimeException;
 import org.esmartpoint.genesis.util.GokuElement;
@@ -68,8 +74,25 @@ public class GenesisApp
         	//DBRidermoveGeneratorScript script = springContext.getBean(DBRidermoveGeneratorScript.class);
         	//MongoDbRidermoveGeneratorScript script = springContext.getBean(MongoDbRidermoveGeneratorScript.class);
         	//CouchbaseGeneratorScript script = springContext.getBean(CouchbaseGeneratorScript.class);
-        	PostgresqlGeneratorScript script = springContext.getBean(PostgresqlGeneratorScript.class);
+        	UserGeneratorScript script = springContext.getBean(UserGeneratorScript.class);
+        	IDataRepository respository = new CouchbaseRepositoryProvider(CouchbaseRepositorySettings.builder()
+        		.nodes("192.168.1.9")
+        		.key("id")
+        		.bucketName("allianz"));
+        	
+//        	IDataRepository respository = new FileSystemRepositoryProvider(FileSystemRepositorySettings.builder()
+//        		.directory("c:/data/users")
+//        		.key("id")
+//        		.levels(1));
+        	
+        	//PostgresqlGeneratorScript script = springContext.getBean(PostgresqlGeneratorScript.class);
+
+        	respository.init();
+        	script.setDataRepository(respository);
+        	
         	script.run();
+        	
+        	respository.done();
 
 //        	System.out.println("EVALUATIONS operations took, " +  PeriodFormat.getDefault().print(new Period(Cronometro.get("EVALUATIONS").sum)));
 //        	System.out.println("DATABASE operations took, " +  PeriodFormat.getDefault().print(new Period(Cronometro.get("DATABASE").sum)));

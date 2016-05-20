@@ -1,0 +1,152 @@
+Couchbase, 8 GB RAM, Linux Virtual
+Insertando
+1287 Req/seg (Despues de 2,5 millones)
+Consulta mientras inserta 1,7 Req/seg
+1487 Req/seg (Despues de 23,9 millones)
+
+ID Is indexed
+
+949ms SELECT * FROM allianz where id > 119101 limit 10;
+42ms (from cache) SELECT * FROM allianz where id > 119101 limit 10;
+
+949ms - 700ms SELECT * FROM allianz where id = 119101 limit 10;
+42ms (from cache) SELECT * FROM allianz where id > 119101 limit 10;
+
+101ms SELECT * FROM allianz where id = 1119101
+3ms (from cache) SELECT * FROM allianz where id = 1119101
+
+firstName is not indexed
+
+(32 seg) SELECT * FROM allianz where firstName = "Luis" limit 10;
+(242 ms) (from cache) SELECT * FROM allianz where firstName = "Luis" limit 10;
+
+multiget 
+SELECT * FROM allianz where id IN (1115101, 2115101, 615101, 915101)
+
+MongoDB, 8 GB RAM, Linux Virtual
+Insertando
+2000 Req/seg (Despues de 0,4 millones)
+2200 Req/seg (Despues de 9,7 millones)
+
+918 Req/seg (While Indexing a column de 11,8 millones)
+
+Create index in MongoDB
+db.users.createIndex( { id: 1 }, {background: true, unique: true} );
+
+Search element
+db.users.find({id:100000});
+
+Limit query
+
+db.users.find({id:100}).limit(10);
+
+Sort and limit
+db.users.find().sort( { firstName: 1 } ).limit( 10 );
+
+db.users.createIndex( { firstName: 1 }, {background: true, unique: true} );
+
+db.users.createIndex( { firstName: 1 }, {background: true, unique: true} );
+db.users.find({firstName:"Pedro"}).sort( { firstName: 1 } ).skip(0).limit( 10 );
+
+db.users.createIndex( { "entity.createdOn": 1 }, {background: true, unique: false} );
+
+db.users.find().limit(10).pretty();
+
+db.users.find({firstName:"Pedro"}).sort( { "entity.createdOn": 1 } ).skip(0).limit( 10 );
+db.users.find({firstName:"Pedro"}).skip(0).limit( 10 );
+
+db.users.createIndex( { "description": "text" }, {background: true, unique: false} );
+
+
+NOSQL vs SQL
+Dimitri Fontaine at All Your Base 2015
+https://vimeo.com/album/3660528/video/145842298?utm_content=bufferd57c2&utm_medium=social&utm_source=twitter.com&utm_campaign=buffer
+NoSQL Distilled to an hour by Martin Fowler
+https://www.youtube.com/watch?v=ASiU89Gl0F0
+
+
+Postgresql (JSonB Column)
+Insertando
+2409 Req/seg (Despues de 0,8 millones)
+2502 Req/seg (Despues de 6,2 millones)
+2218 Req/seg (Despues de 60,2 millones y con un indice adicional)
+
+Crear indice por campo JSONB
+CREATE INDEX ON public.users ((document->>'firstName'));
+
+select u.id,u.document->>'firstName', u.document from users u where id > 200 limit 10
+select u.id,u.document->>'firstName', u.document from users u where id > 200000 order by u.document->>'firstName' limit 20
+
+select * from (select * from users limit 100) as t where (t.document->'entity'->>'rank')::int = 4
+
+select u.*, e.*, ud.* from scd_users u inner join scd_entities e on u.user_id = e.entity_id left join usuario_detalles ud on u.user_id = ud.usuario_id
+where e.entity_id IN (select e1.entity_id from scd_entity_categories ec inner join scd_entities e1 on ec.entity_id = e1.entity_id 
+						inner join scd_categories c on ec.category_id = c.category_id where c.category_id = 4 and e1.entity_id = u.user_id)
+order by u.first_name desc
+limit 20 
+
+select u.id, u.document->>'firstName', u.document from users u where u.document->>'firstName' = 'Juan' limit 20
+42 ms while batch insert is running
+
+select ec.* from scd_entity_categories ec inner join scd_entities e1 on ec.entity_id = e1.entity_id 
+						inner join scd_categories c on ec.category_id = c.category_id 
+						where e1.entity_class_id = 100
+limit 10	
+
+select *, t.document #> '{entity,tags,name}' from (select * from users limit 100) as t -- where t.document #> '{entity,tags,name}' = '"Rampa 90"'
+
+Java Parser
+com.infosys.lucene.code.JavaParser.*;
+
+Schema for multilanguage database
+http://stackoverflow.com/questions/316780/schema-for-a-multilanguage-database
+
+select u.id, u.document->'entity'->'tags'->1->'name', u.document from users u where u.document->>'firstName' = 'Juan' limit 20
+
+select u.id, u.document->'entity'->>'tags', u.document from users u 
+where  	u.document->'entity'->'tags' @> '[{"name":"Quarter","tagId": 5}]'
+limit 20
+
+CREATE INDEX idxgintags ON users USING GIN ((document->'entity'->'tags'));
+
+HOW TO COUCHBASE
+
+cd /tmp
+
+Version estable
+wget http://packages.couchbase.com/releases/4.1.1/couchbase-server-enterprise_4.1.1-ubuntu14.04_amd64.deb
+
+Version beta
+http://packages.couchbase.com/releases/4.5.0-beta/couchbase-server-enterprise_4.5.0-beta-ubuntu14.04_amd64.deb
+
+sudo apt-get install libssl0.9.8
+sudo dpkg -i couchbase-server-enterprise_4.1.1-ubuntu14.04_amd64.deb
+
+Elastic search Linux VM, no optimizado
+
+Inserted:33.000 items in: 1 minutes 48 seconds 
+Overall speed: 305 opers/sec current speed: 314 opers/sec
+
+Inserted:3.519.000 items in: 5 hours 58 minutes 50 seconds 
+Overall speed: 163 opers/sec current speed: 160 opers/sec
+
+
+Generator NOP Performance
+
+Inserted:471.000 items in: 50 seconds 
+Overall speed: 9387 opers/sec current speed: 9090 opers/sec
+
+Generator FileSystemm Performance Disco SATA
+
+Inserted:60.000 items in: 22 seconds 
+Overall speed: 2692 opers/sec current speed: 3333 opers/sec
+
+Generator FileSystemm Performance Disco SSD
+
+Inserted:68.000 items in: 27 seconds 
+Overall speed: 2449 opers/sec current speed: 2487 opers/sec
+
+Generator Couchbase Maquina Virtual
+
+Inserted:97.000 items in: 1 minutes 36 seconds 
+Overall speed: 1001 opers/sec current speed: 896 opers/sec
