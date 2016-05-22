@@ -9,4 +9,9 @@ public interface IDataRepository extends CrudRepository<JSONObject, Long>  {
 	
 	void done();
 	
+	public Iterable<JSONObject> findAll(Long from, Long size);
+
+	void commit();
+
+	void begin();
 }

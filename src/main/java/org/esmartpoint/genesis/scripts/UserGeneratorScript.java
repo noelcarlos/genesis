@@ -1,11 +1,9 @@
 package org.esmartpoint.genesis.scripts;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.HashMap;
-import java.util.Locale;
 
 import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.esmartpoint.genesis.helpers.DbHelper;
 import org.esmartpoint.genesis.helpers.GeneratorHelper;
@@ -14,10 +12,8 @@ import org.esmartpoint.genesis.output.provider.IDataRepository;
 import org.esmartpoint.genesis.selectors.WeightedEntitySelector;
 import org.esmartpoint.genesis.selectors.WeightedItemSelector;
 import org.esmartpoint.genesis.selectors.WeightedMapSelector;
+import org.esmartpoint.genesis.util.Stats;
 import org.joda.time.DateTime;
-import org.joda.time.Period;
-import org.joda.time.format.PeriodFormatter;
-import org.joda.time.format.PeriodFormatterBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,29 +29,7 @@ public class UserGeneratorScript {
 	
 	IDataRepository repository;
 	
-	static DateTime start;
-	static DateTime last;
-	static long operationsCounter;
-	static long lastOperationCounter;
-	static long operationsBufferSize;
-	
-	DecimalFormat longIntegerFormat = (DecimalFormat)NumberFormat.getNumberInstance(new Locale("es", "es"));
-	
-	PeriodFormatter formatter = new PeriodFormatterBuilder()
-	    .appendDays().appendSuffix(" days ")
-	    .appendHours().appendSuffix(" hours ")
-	    .appendMinutes().appendSuffix(" minutes ")
-	    .appendSeconds().appendSuffix(" seconds ")
-	    .appendWeeks().appendSuffix(" weeks ")
-	    .printZeroNever()
-	    .toFormatter();
-	
 	public UserGeneratorScript() {
-		start = DateTime.now();
-    	last = start;
-    	operationsCounter = 0;
-    	lastOperationCounter = 0;
-    	operationsBufferSize = 1000;
 	}
 	
 	public void run() throws Exception {
@@ -71,7 +45,9 @@ public class UserGeneratorScript {
 //		bucket.bucketManager().createIndex("id", true, false, "id");
 //		bucket.bucketManager().createIndex("type", true, false, "type");
 //
+		repository.begin();	
 		generateMain();
+		repository.commit();
 		
 //		cluster.disconnect();
 
@@ -97,12 +73,33 @@ public class UserGeneratorScript {
 //			"}", "JSON");
 		
 		generateUsers();
+		//findOneUser();
+		//findAllUser();
 		
 		dbHelper.closeConnection(null);
 	}
 	
+	protected void findOneUser() throws JSONException {
+		for (int i = 0; i < MAX_USERS; i++) {
+			long id = generator.randomInt(162263936,  162263936 + 6000000);
+			JSONObject data = repository.findOne(id);
+			//System.out.println(data.toString(4));
+			Stats.iterate();
+			Stats.printSpeed();
+		}
+	}
+	
+	protected void findAllUser() throws JSONException {
+		for (int i = 0; i < MAX_USERS; i++) {
+			long id = generator.randomInt(1,  6000000);
+			repository.findAll(id, 10L);
+			Stats.iterate();
+			Stats.printSpeed();
+		}
+	}
+
 	@SuppressWarnings("unchecked")
-	private void generateUsers() throws Exception {
+	protected void generateUsers() throws Exception {
 		WeightedItemSelector<Boolean> isDeleted =  new WeightedItemSelector<Boolean>()
 			.add(10, true)
 			.add(90, false)
@@ -286,27 +283,13 @@ public class UserGeneratorScript {
 			body.put("requisitos", requisitos);
 			
 			repository.save(body);
+
+			Stats.iterate();
+
+			repository.commit();
+			repository.begin();
 			
-			printStats();			
-		}
-	}
-
-	protected void printStats() {
-		operationsCounter++;
-		lastOperationCounter++;
-		
-		if (operationsCounter % operationsBufferSize == 0) {
-			DateTime span = DateTime.now().minus(start.getMillis());
-			DateTime lastSpan = DateTime.now().minus(last.getMillis());
-			long diff = span.getMillis();
-			long diffSpan = lastSpan.getMillis(); 
-			Period period = new Period(start, DateTime.now());
-
-			System.out.println("Inserted:" + longIntegerFormat.format(operationsCounter) + " items in: " + formatter.print(period));
-			System.out.println("Overall speed: " + (long)(operationsCounter / (diff / 1000.0)) 
-				+ " opers/sec current speed: " + (long)(lastOperationCounter / (diffSpan / 1000.0)) + " opers/sec");
-			last = DateTime.now();
-			lastOperationCounter = 0;
+			Stats.printSpeed();
 		}
 	}
 

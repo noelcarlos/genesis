@@ -1,45 +1,47 @@
 package org.esmartpoint.genesis.output.provider;
 
-import java.io.File;
+import java.util.HashMap;
 
-import org.apache.commons.io.FileUtils;
 import org.codehaus.jettison.json.JSONObject;
+import org.esmartpoint.genesis.helpers.DbHelper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class FileSystemRepositoryProvider implements IDataRepository  {
+public class PostgresqlRepositoryProvider implements IDataRepository  {
 
-	FileSystemRepositorySettings settings;
+	@Autowired DbHelper dbHelper;
+	PostgresqlRepositorySettings settings;
 	
-	public void setSettings(FileSystemRepositorySettings settings) {
+	public PostgresqlRepositoryProvider() {
+		
+	}
+	
+	public void setSettings(PostgresqlRepositorySettings settings) {
 		this.settings = settings;
 	}
 	
 	@Override
 	public void init() {
-		new File(settings.directory).mkdirs();
+		dbHelper.createConnection("target", "org.postgresql.Driver", 
+			"jdbc:postgresql://localhost:5432/ridermove?charSet=UTF8", 
+			"wwwwww", "postgres", "org.hibernate.dialect.PostgreSQLDialect");
 	}
 	
 	public void done() {
+		dbHelper.closeConnection("target");
 	}
 	
 	@Override
 	public <S extends JSONObject> S save(S entity) {
-		String keyStr;
 		try {
-			int key = entity.getInt(settings.key());
-			keyStr = "" + key;
-			String path = "";
-			if (key < 1000000) {
-				path = "b" + (key % 1000) +"/";
-			}
-			String filename = settings.directory + "/" + path + keyStr + ".json";
-			String contents = entity.toString();
-			FileUtils.writeStringToFile(new File(filename), contents, "UTF-8");
+			HashMap<String, Object> record = new HashMap<String, Object>();
+			record.put("document", entity.toString());
+			dbHelper.insert("target", settings.table(), record, settings.key());
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-		return null;
+		return entity;
 	}
 
 	@Override
@@ -50,8 +52,22 @@ public class FileSystemRepositoryProvider implements IDataRepository  {
 
 	@Override
 	public JSONObject findOne(Long id) {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			HashMap<String, Object> record = dbHelper.findOne("target", settings.table(), "id", id.intValue());
+			return null;
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	@Override
+	public Iterable<JSONObject> findAll(Long from, Long size) {
+		try {
+			
+			return null;
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
@@ -103,20 +119,13 @@ public class FileSystemRepositoryProvider implements IDataRepository  {
 	}
 
 	@Override
-	public Iterable<JSONObject> findAll(Long from, Long size) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public void commit() {
-		// TODO Auto-generated method stub
-		
+		dbHelper.commit("target");		
 	}
 
 	@Override
 	public void begin() {
-		// TODO Auto-generated method stub
-		
+		dbHelper.begin("target");
 	}
+	
 }

@@ -1,6 +1,8 @@
 package org.esmartpoint.genesis.helpers;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.joda.time.DateTime;
@@ -41,7 +43,7 @@ public class GeneratorHelper {
 	}
 	
 	public String randomAlphaNumeric(int minLength, int maxLength) {
-		StringBuilder builder = new StringBuilder();
+		StringBuilder builder = new StringBuilder(maxLength);
 		int count = (int)randomNumber(minLength, maxLength);
 		while (count-- != 0) {
 			int character = (int)(Math.random()*ALPHA_NUMERIC_STRING.length());
@@ -51,7 +53,7 @@ public class GeneratorHelper {
 	}
 	
 	public String randomHexNumeric(int count) {
-		StringBuilder builder = new StringBuilder();
+		StringBuilder builder = new StringBuilder(count);
 		while (count-- != 0) {
 			int character = (int)(Math.random()*HEX_STRING.length());
 			builder.append(HEX_STRING.charAt(character));
@@ -60,7 +62,7 @@ public class GeneratorHelper {
 	}
 	
 	public String randomAlpha(int minLength, int maxLength) {
-		StringBuilder builder = new StringBuilder();
+		StringBuilder builder = new StringBuilder(maxLength);
 		int count = randomNumber(minLength, maxLength);
 		while (count-- != 0) {
 			int character = (int)(Math.random()*ALPHA_STRING.length());
@@ -69,8 +71,8 @@ public class GeneratorHelper {
 		return builder.toString();
 	}
 	
-	public String randomWord(int minLength, int maxLength) {
-		StringBuilder builder = new StringBuilder();
+	public String randomWordRaw(int minLength, int maxLength) {
+		StringBuilder builder = new StringBuilder(maxLength);
 		int count = randomNumber(minLength, maxLength);
 		char chr = 0;
 		for (int i = 0; i < count; i++) {
@@ -91,16 +93,35 @@ public class GeneratorHelper {
 	    }
 		return builder.toString();
 	}
+
+	static HashMap<String, List<String>> wordCache = new HashMap<String, List<String>>();
+	int MAX_DICTIONARY_LENGTH = 1000;
+
+	public String randomWord(int minLength, int maxLength) {
+		String key = minLength + ":" + maxLength;
+		List<String> wordCollection = wordCache.get(key);
+		if (wordCollection == null) {
+			wordCollection = new ArrayList<>();
+			wordCache.put(key, wordCollection);
+		}
+		if (wordCollection.size() < MAX_DICTIONARY_LENGTH) {
+			String word = randomWordRaw(minLength, maxLength);
+			wordCollection.add(word);
+			return word;
+		}
+		int index = randomNumber(0, MAX_DICTIONARY_LENGTH - 1);
+		return wordCollection.get(index);
+	}
 	
 	public String randomSentence(int minLength, int maxLength, int minWordLength, int maxWordLength) {
-		StringBuilder builder = new StringBuilder();
+		StringBuilder builder = new StringBuilder(maxLength);
 		int count = randomNumber(minLength, maxLength);
 		while (builder.length() < count) {
 			if (builder.length() != 0)
 				builder.append(' ');
 			builder.append(randomWord(minWordLength, maxWordLength));
 		}
-		String res = builder.toString().substring(0, 1).toUpperCase() + builder.toString().substring(1);
+		String res = builder.substring(0, 1).toUpperCase() + builder.substring(1);
 		if (res.length() >= maxLength - 1)
 			return res.substring(0, (int)maxLength - 1).trim() + ".";
 		else
@@ -108,29 +129,29 @@ public class GeneratorHelper {
 	}
 	
 	public String randomTitle(int minLength, int maxLength, int minWordLength, int maxWordLength) {
-		StringBuilder builder = new StringBuilder();
+		StringBuilder builder = new StringBuilder(maxLength);
 		int count = randomNumber(minLength, maxLength);
 		while (builder.length() < count) {
 			if (builder.length() != 0)
 				builder.append(' ');
 			builder.append(randomWord(minWordLength, maxWordLength));
 		}
-		String res = builder.toString().substring(0, 1).toUpperCase() + builder.toString().substring(1);
+		String res = builder.substring(0, 1).toUpperCase() + builder.substring(1);
 		if (res.length() >= maxLength - 1)
-			return res.substring(0, (int)maxLength - 1).trim();
+			return res.substring(0, maxLength - 1).trim();
 		else
 			return res.trim();
 	}
 	
 	public String randomFilename(int minLength, int maxLength, int minWordLength, int maxWordLength, String ext) {
-		StringBuilder builder = new StringBuilder();
+		StringBuilder builder = new StringBuilder(maxLength);
 		int count = randomNumber(minLength, maxLength);
 		while (builder.length() < count) {
 			if (builder.length() != 0)
 				builder.append('-');
 			builder.append(randomWord(minWordLength, maxWordLength));
 		}
-		String res = builder.toString().substring(0, 1).toUpperCase() + builder.toString().substring(1);
+		String res = builder.substring(0, 1).toUpperCase() + builder.substring(1);
 		if (res.length() >= maxLength - 1)
 			return res.substring(0, (int)maxLength - 1).trim() + "." + ext;
 		else
@@ -138,14 +159,14 @@ public class GeneratorHelper {
 	}
 	
 	public String randomParagraph(int minLength, int maxLength, int minSentenceLength, int maxSentenceLength, int minWordLength, int maxWordLength) {
-		StringBuilder builder = new StringBuilder();
+		StringBuilder builder = new StringBuilder(maxLength);
 		int count = randomNumber(minLength, maxLength);
 		while (builder.length() < count) {
 			if (builder.length() != 0)
 				builder.append(' ');
 			builder.append(randomSentence(minSentenceLength, maxSentenceLength, minWordLength, maxWordLength));
 		}
-		String res = builder.toString().substring(0, 1).toUpperCase() + builder.toString().substring(1);
+		String res = builder.substring(0, 1).toUpperCase() + builder.substring(1);
 		if (res.length() >= maxLength - 1)
 			return res.substring(0, (int)maxLength - 1).trim() + ".";
 		else
@@ -154,7 +175,7 @@ public class GeneratorHelper {
 	
 	public String randomText(int minLength, int maxLength, String breakChars, int minParagraphLength, int maxParagraphLength,
 			int minSentenceLength, int maxSentenceLength, int minWordLength, int maxWordLength) {
-		StringBuilder builder = new StringBuilder();
+		StringBuilder builder = new StringBuilder(maxLength);
 		int count = randomNumber(minLength, maxLength);
 		breakChars = "\r\n";
 		while (builder.length() < count) {
@@ -162,7 +183,7 @@ public class GeneratorHelper {
 				builder.append(breakChars);
 			builder.append(randomParagraph(minParagraphLength, maxParagraphLength, minSentenceLength, maxSentenceLength, minWordLength, maxWordLength));
 		}
-		String res = builder.toString().substring(0, 1).toUpperCase() + builder.toString().substring(1);
+		String res = builder.substring(0, 1).toUpperCase() + builder.substring(1);
 		if (res.length() >= maxLength - 1)
 			return res.substring(0, (int)maxLength - 1).trim() + ".";
 		else
@@ -170,7 +191,7 @@ public class GeneratorHelper {
 	}
 	
 	public String randomAlphaWithSpaces(int minLength, int maxLength, int minWordLength, int maxWordLength) {
-		StringBuilder builder = new StringBuilder();
+		StringBuilder builder = new StringBuilder(maxLength);
 		int count = randomNumber(minLength, maxLength);
 		int wordLength = randomNumber(minWordLength, maxWordLength);
 		for (int i = 0; i < count; i++) {
@@ -195,7 +216,7 @@ public class GeneratorHelper {
 		int b = randomNumber(0, 255);
 		int c = randomNumber(0, 255);
 		int d = randomNumber(2, 255);
-		return MessageFormat.format("{0}.{1}.{2}.{3}", a,b,c,d);
+		return a + "." + b + "." + "." + c + "." + d;
 	}
 
 	public String randomFirstName() {

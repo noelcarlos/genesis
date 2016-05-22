@@ -133,20 +133,104 @@ Overall speed: 163 opers/sec current speed: 160 opers/sec
 
 Generator NOP Performance
 
-Inserted:471.000 items in: 50 seconds 
-Overall speed: 9387 opers/sec current speed: 9090 opers/sec
+	Inserted:3.558.000 items in: 6 minutes (Java 7)
+	Overall speed: 9864 opers/sec current speed: 10101 opers/sec
+
+	Inserted:321.000 items in: 21 seconds (IntelliJ / Java 8)
+	Overall speed: 15056 opers/sec current speed: 18181 opers/sec
+
+	Inserted:321.000 items in: 21 seconds (IntelliJ Java 8)
+	Overall speed: 15056 opers/sec current speed: 18181 opers/sec
+
+	Inserted:688.000 items in: 33 seconds (Eclipse Java 8)
+	Overall speed: 20405 opers/sec current speed: 22222 opers/sec
 
 Generator FileSystemm Performance Disco SATA
 
-Inserted:60.000 items in: 22 seconds 
-Overall speed: 2692 opers/sec current speed: 3333 opers/sec
+	Inserted:34.000 items in: 26 seconds (Disco D)
+	Overall speed: 1264 opers/sec current speed: 5076 opers/sec
+
+	Inserted:177.000 items in: 2 minutes 9 seconds (Disco F)
+	Overall speed: 1370 opers/sec current speed: 4854 opers/sec
 
 Generator FileSystemm Performance Disco SSD
 
-Inserted:68.000 items in: 27 seconds 
-Overall speed: 2449 opers/sec current speed: 2487 opers/sec
+	Inserted:68.000 items in: 27 seconds 
+	Overall speed: 2449 opers/sec current speed: 2487 opers/sec
 
-Generator Couchbase Maquina Virtual
+	Inserted:139.000 items in: 41 seconds 
+	Overall speed: 3344 opers/sec current speed: 3703 opers/sec
 
-Inserted:97.000 items in: 1 minutes 36 seconds 
-Overall speed: 1001 opers/sec current speed: 896 opers/sec
+Generator Couchbase Maquina Virtual En Disco Rigido
+
+	Inserted:97.000 items in: 1 minutes 36 seconds 
+	Overall speed: 1001 opers/sec current speed: 896 opers/sec
+
+Generator Couchbase Maquina Virtual En Disco SSD
+
+	Inserted:251.000 items in: 2 minutes 30 seconds 
+	Overall speed: 1664 opers/sec current speed: 1926 opers/sec
+
+Couchbase random read by ID speed Maquina Virtual En Disco SSD, 6 millones de registros
+
+	Read:162.000 items in: 1 minutes 27 seconds 
+	Overall speed: 1853 opers/sec current speed: 1980 opers/sec
+
+Couchbase random findAll limit 10 speed Maquina Virtual En Disco SSD, 6 millones de registros
+	List:2.000 items in: 2 minutes 12 seconds 
+	Overall speed: 15 opers/sec current speed: 15 opers/sec Media 63ms
+
+Couchbase random findAll limit 10 speed Maquina Virtual En Disco SSD, 6 millones de registros, Multithread 10 hilos
+	Overall speed: 68 opers/sec Avg 289ms media 
+
+Postgresql Maquina Real DB en Disco Rigido
+	Inserted:252.000 items in: 1 minutes 
+	Overall speed: 4141 opers/sec current speed: 4587 opers/sec
+
+Postgresql Maquina Real DB en Disco Rigido
+	findOne: In 7 millones items  
+	86.8 opers/sec Avg 10ms
+
+Postgresql Maquina Real DB en Disco Rigido
+	findAll limit 10: In 7 millones items  
+	59.3 opers/sec Avg 22ms
+	
+Postgresql Maquina Real DB en Disco Rigido, Multithread 10 hilos
+	findOne: In 7 millones items  
+	154.3 opers/sec Avg 63ms	
+
+Postgresql Maquina Real DB en Disco Rigido, Multithread 10 hilos
+	findAll limit 10: In 7 millones items  
+	192.3 opers/sec Avg 51ms	
+
+Postgresql Maquina Real DB en Disco Rigido, Multithread 50 hilos
+	findOne: In 7 millones items  
+	200.3 opers/sec Avg 240ms
+	
+Postgresql Maquina Real DB en Disco Rigido
+	findAllByTag limit 10: In 7 millones items  
+	3,8 opers/sec Avg 264ms
+	
+Postgresql Maquina Real DB en Disco Rigido
+	findAllByTag limit 10: In 200000 items  
+	156,7 opers/sec Avg 6ms
+			
+Postgresql Maquina Real DB en Disco Rigido
+	findOne: In 200000 items  
+	1263,7 opers/sec Avg 0ms		
+	
+Postgresql Maquina Real DB en Disco Rigido
+	findAllByTag limit 10: In 15000 items  
+	100,1 opers/sec Avg 0ms		
+	
+Postgresql Maquina Real DB en Disco Rigido, Multithread 20 hilos
+	findAllByTag limit 10: In 100000 items  
+	588,6 opers/sec Avg 0ms
+	
+Postgresql Maquina Real DB en Disco Rigido, Multithread 20 hilos
+	findAllByTag limit 10: In 15000 items  
+	378,6 opers/sec Avg 0ms	
+
+Postgresql Maquina Real DB en Disco Rigido, Multithread 20 hilos
+	findAllByTag limit 10: In 500000 items  
+	126.8 opers/sec Avg 148ms	

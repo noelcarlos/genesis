@@ -5,12 +5,15 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import org.esmartpoint.dbutil.Cronometro;
 import org.esmartpoint.dbutil.DAOBase;
 import org.esmartpoint.dbutil.db.metadata.FieldInfo;
@@ -95,6 +98,15 @@ public class DbHelper {
 	}
 	
 	@SuppressWarnings("unchecked")
+	public HashMap<String, Object> findOne(String name, String tableName, String keyField, Integer id) {
+		SQLQuery query = getSession(name).createSQLQuery("SELECT * FROM " + tableName + " WHERE " + keyField + "=:" + keyField);
+		query.setParameter(keyField, id);
+		query.addScalar("document", org.hibernate.type.TextType.INSTANCE);
+		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
+		return (HashMap<String, Object>)query.uniqueResult();
+	}
+	
+	@SuppressWarnings("unchecked")
 	public List<HashMap<String, Object>> list(String name, String str, HashMap<String, Object> params) {
 		SQLQuery query = getSession(name).createSQLQuery(str);
 		query.setResultTransformer(AliasToEntityMapResultTransformer.INSTANCE);
@@ -131,6 +143,26 @@ public class DbHelper {
 				daoBase.initConnection(connection);
 		    }
 		});
+	}
+	
+	public static HashMap<String, Object> jsonToMap(JSONObject jObject) throws JSONException {
+        HashMap<String, Object> map = new HashMap<String, Object>();
+        Iterator<?> keys = jObject.keys();
+
+        while( keys.hasNext() ){
+            String key = (String)keys.next();
+            map.put(key, jObject.get(key));
+        }
+
+        return map;
+    }
+	
+	public void insert(String name, String entityName, JSONObject values, String keyOutput) throws Exception {
+		HashMap<String, Object> map = jsonToMap(values);
+		insert(name, entityName, map, keyOutput);
+		if (keyOutput != null) {
+			values.put(keyOutput, map.get(keyOutput));
+		}
 	}
 	
 	public void insert(String name, String entityName, HashMap<String, Object> values, String keyOutput) throws Exception {
@@ -232,14 +264,14 @@ public class DbHelper {
 			values.put(keyOutput, ((Number)res).intValue());
 		}
 		
-		if (Stats.iterate()) {
-			Cronometro.start("DATABASE");
-			commit(name);
-			begin(name);
-			Cronometro.stop("DATABASE");
-		}
-		
-		Stats.printSpeed();
+//		if (Stats.iterate()) {
+//			Cronometro.start("DATABASE");
+//			commit(name);
+//			begin(name);
+//			Cronometro.stop("DATABASE");
+//		}
+//		
+//		Stats.printSpeed();
 	}
 	
 	public void script(String name, String text) {

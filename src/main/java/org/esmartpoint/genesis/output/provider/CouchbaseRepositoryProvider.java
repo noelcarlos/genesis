@@ -1,20 +1,32 @@
 package org.esmartpoint.genesis.output.provider;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.springframework.stereotype.Service;
 
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.Cluster;
 import com.couchbase.client.java.CouchbaseCluster;
 import com.couchbase.client.java.document.JsonDocument;
 import com.couchbase.client.java.document.json.JsonObject;
+import com.couchbase.client.java.query.N1qlQuery;
+import com.couchbase.client.java.query.N1qlQueryResult;
+import com.couchbase.client.java.query.N1qlQueryRow;
 
+@Service
 public class CouchbaseRepositoryProvider implements IDataRepository  {
 
 	Cluster cluster;
 	Bucket bucket;
 	CouchbaseRepositorySettings settings;
 	
-	public CouchbaseRepositoryProvider(CouchbaseRepositorySettings settings) {
+	public CouchbaseRepositoryProvider() {
+	}
+	
+	public void setSettings(CouchbaseRepositorySettings settings) {
 		this.settings = settings;
 	}
 	
@@ -64,8 +76,26 @@ public class CouchbaseRepositoryProvider implements IDataRepository  {
 
 	@Override
 	public JSONObject findOne(Long id) {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			return new JSONObject(bucket.get("" + id).content().toString());
+		} catch (JSONException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	@Override
+	public Iterable<JSONObject> findAll(Long from, Long size) {
+		try {
+			N1qlQueryResult queryResult = bucket.query(N1qlQuery.simple("SELECT * FROM " + settings.bucketName() 
+				+ " WHERE " + settings.key() + " >= " + from + " limit " + size));
+			List<JSONObject> res = new ArrayList<>();
+			for (N1qlQueryRow element: queryResult.allRows()) {
+				res.add(new JSONObject(element.value().toString()));
+			}
+			return res;
+		} catch (JSONException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
@@ -112,6 +142,18 @@ public class CouchbaseRepositoryProvider implements IDataRepository  {
 
 	@Override
 	public void deleteAll() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void commit() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void begin() {
 		// TODO Auto-generated method stub
 		
 	}

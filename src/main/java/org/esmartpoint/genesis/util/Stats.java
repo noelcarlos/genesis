@@ -34,6 +34,15 @@ public class Stats {
     	lastOperationCounter = 0;
     	operationsBufferSize = 1000;
 	}
+	
+	static public void done() {
+		DateTime span = DateTime.now().minus(start.getMillis());
+		long diff = span.getMillis();
+		Period period = new Period(start, DateTime.now());
+
+		System.out.println("Total items:" + longIntegerFormat.format(operationsCounter) + " items in: " + formatter.print(period));
+		System.out.println("Speed: " + (long)(operationsCounter / (diff / 1000.0))	+ " opers/sec");
+	}
 
 	static public boolean iterate() {
 		operationsCounter++;

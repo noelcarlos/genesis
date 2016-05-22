@@ -8,6 +8,8 @@ import org.esmartpoint.genesis.output.provider.CouchbaseRepositorySettings;
 import org.esmartpoint.genesis.output.provider.FileSystemRepositoryProvider;
 import org.esmartpoint.genesis.output.provider.FileSystemRepositorySettings;
 import org.esmartpoint.genesis.output.provider.IDataRepository;
+import org.esmartpoint.genesis.output.provider.PostgresqlRepositoryProvider;
+import org.esmartpoint.genesis.output.provider.PostgresqlRepositorySettings;
 import org.esmartpoint.genesis.plugins.CommandDispatcher;
 import org.esmartpoint.genesis.plugins.units.DbCommandUnit;
 import org.esmartpoint.genesis.plugins.units.DefaultCommandUnit;
@@ -61,7 +63,6 @@ public class GenesisApp
         	xmlProccesor.init();
         	xmlProccesor.setup();
         	commandDispatcher.setupPlugins(null);
-        	Stats.init();
 
         	//HashMap<String, Object> input = new HashMap<String, Object>();
         	//xmlProccesor.execute("data/test-followfun/main.xml", input);
@@ -74,25 +75,32 @@ public class GenesisApp
         	//DBRidermoveGeneratorScript script = springContext.getBean(DBRidermoveGeneratorScript.class);
         	//MongoDbRidermoveGeneratorScript script = springContext.getBean(MongoDbRidermoveGeneratorScript.class);
         	//CouchbaseGeneratorScript script = springContext.getBean(CouchbaseGeneratorScript.class);
-        	UserGeneratorScript script = springContext.getBean(UserGeneratorScript.class);
-        	IDataRepository respository = new CouchbaseRepositoryProvider(CouchbaseRepositorySettings.builder()
-        		.nodes("192.168.1.9")
-        		.key("id")
-        		.bucketName("allianz"));
+        	//PostgresqlGeneratorScript script = springContext.getBean(PostgresqlGeneratorScript.class);
+        	
+//        	IDataRepository respository = new CouchbaseRepositoryProvider(CouchbaseRepositorySettings.builder()
+//        		.nodes("192.168.1.12")
+//        		.key("id")
+//        		.bucketName("allianz"));
         	
 //        	IDataRepository respository = new FileSystemRepositoryProvider(FileSystemRepositorySettings.builder()
-//        		.directory("c:/data/users")
+//        		.directory("d:/data/users")
 //        		.key("id")
 //        		.levels(1));
+        	PostgresqlRepositoryProvider repository = springContext.getBean(PostgresqlRepositoryProvider.class);
+        	repository.setSettings(PostgresqlRepositorySettings.builder()
+        		.table("users")
+        		.key("id"));
         	
-        	//PostgresqlGeneratorScript script = springContext.getBean(PostgresqlGeneratorScript.class);
+        	repository.init();
 
-        	respository.init();
-        	script.setDataRepository(respository);
+        	UserGeneratorScript script = springContext.getBean(UserGeneratorScript.class);
+        	script.setDataRepository(repository);
         	
+        	Stats.init();
         	script.run();
         	
-        	respository.done();
+        	repository.done();
+        	Stats.done();
 
 //        	System.out.println("EVALUATIONS operations took, " +  PeriodFormat.getDefault().print(new Period(Cronometro.get("EVALUATIONS").sum)));
 //        	System.out.println("DATABASE operations took, " +  PeriodFormat.getDefault().print(new Period(Cronometro.get("DATABASE").sum)));
