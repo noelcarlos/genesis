@@ -1,0 +1,41 @@
+curl -XGET 'http://localhost:9200/ridermove/users/_search' -d '{
+	"from" : 0, "size" : 20,
+	"_source": ["firstName*", "lastName*"],
+    "query": {
+        "bool" : {
+            "must" : {
+                "query_string" : {
+                    "query" : "pedro"
+                }
+            },
+            "filter" : {
+                "term" : { "type" : "user" }
+            }
+        }
+    },
+	"aggregations": {
+      "tipoDeNavegador": {
+         "terms": {
+            "field": "browserType"
+         }
+      },
+	  "servicios": {
+		 "terms": {
+            "field": "servicios.name"
+         }
+      },
+	  "categorias": {
+		 "terms": {
+            "field": "entity.categories.name"
+         }
+      }
+   }
+}'
+
+curl -XGET 'http://localhost:9200/ridermove/users/_search' -d '{
+	"from" : 0, "size" : 10,
+	"_source": ["firstName*", "lastName*"],
+	"query" : {
+        "match_all" : {}
+    }
+}'

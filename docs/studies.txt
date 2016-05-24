@@ -117,10 +117,14 @@ Version estable
 wget http://packages.couchbase.com/releases/4.1.1/couchbase-server-enterprise_4.1.1-ubuntu14.04_amd64.deb
 
 Version beta
-http://packages.couchbase.com/releases/4.5.0-beta/couchbase-server-enterprise_4.5.0-beta-ubuntu14.04_amd64.deb
+wget http://packages.couchbase.com/releases/4.5.0-beta/couchbase-server-enterprise_4.5.0-beta-ubuntu14.04_amd64.deb
 
 sudo apt-get install libssl0.9.8
 sudo dpkg -i couchbase-server-enterprise_4.1.1-ubuntu14.04_amd64.deb
+
+Para instalar en ubuntu 16.4
+sudo apt-get install upstart-sysv
+sudo dpkg -i couchbase-server-enterprise_4.5.0-beta-ubuntu14.04_amd64.deb
 
 Elastic search Linux VM, no optimizado
 
@@ -160,28 +164,6 @@ Generator FileSystemm Performance Disco SSD
 
 	Inserted:139.000 items in: 41 seconds 
 	Overall speed: 3344 opers/sec current speed: 3703 opers/sec
-
-Generator Couchbase Maquina Virtual En Disco Rigido
-
-	Inserted:97.000 items in: 1 minutes 36 seconds 
-	Overall speed: 1001 opers/sec current speed: 896 opers/sec
-
-Generator Couchbase Maquina Virtual En Disco SSD
-
-	Inserted:251.000 items in: 2 minutes 30 seconds 
-	Overall speed: 1664 opers/sec current speed: 1926 opers/sec
-
-Couchbase random read by ID speed Maquina Virtual En Disco SSD, 6 millones de registros
-
-	Read:162.000 items in: 1 minutes 27 seconds 
-	Overall speed: 1853 opers/sec current speed: 1980 opers/sec
-
-Couchbase random findAll limit 10 speed Maquina Virtual En Disco SSD, 6 millones de registros
-	List:2.000 items in: 2 minutes 12 seconds 
-	Overall speed: 15 opers/sec current speed: 15 opers/sec Media 63ms
-
-Couchbase random findAll limit 10 speed Maquina Virtual En Disco SSD, 6 millones de registros, Multithread 10 hilos
-	Overall speed: 68 opers/sec Avg 289ms media 
 
 Postgresql Maquina Real DB en Disco Rigido
 	Inserted:252.000 items in: 1 minutes 
@@ -234,3 +216,14 @@ Postgresql Maquina Real DB en Disco Rigido, Multithread 20 hilos
 Postgresql Maquina Real DB en Disco Rigido, Multithread 20 hilos
 	findAllByTag limit 10: In 500000 items  
 	126.8 opers/sec Avg 148ms	
+
+ElasticSearch (Disco SSD), Maquina Real
+	Inserted:19.000 items in: 2 minutes 7 seconds 
+	Overall speed: 148 opers/sec current speed: 155 opers/sec
+	
+	Inserted:280.000 items in: 36 minutes 12 seconds 
+	Overall speed: 150 opers/sec current speed: 165 opers/sec	
+	
+ElasticSearch (Disco SSD), Maquina Real
+	Busqueda con tres aggregations/facets
+	35 opers/sec  27 ms	

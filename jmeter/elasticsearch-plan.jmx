@@ -27,7 +27,7 @@
         <stringProp name="HTTPSampler.concurrentPool">4</stringProp>
       </ConfigTestElement>
       <hashTree/>
-      <JDBCDataSource guiclass="TestBeanGUI" testclass="JDBCDataSource" testname="JDBC Connection Configuration" enabled="true">
+      <JDBCDataSource guiclass="TestBeanGUI" testclass="JDBCDataSource" testname="JDBC Connection Configuration" enabled="false">
         <boolProp name="autocommit">true</boolProp>
         <stringProp name="checkQuery">Select 1</stringProp>
         <stringProp name="connectionAge">5000</stringProp>
@@ -114,7 +114,7 @@
           <boolProp name="LoopController.continue_forever">false</boolProp>
           <intProp name="LoopController.loops">-1</intProp>
         </elementProp>
-        <stringProp name="ThreadGroup.num_threads">1</stringProp>
+        <stringProp name="ThreadGroup.num_threads">20</stringProp>
         <stringProp name="ThreadGroup.ramp_time"></stringProp>
         <longProp name="ThreadGroup.start_time">1244643768000</longProp>
         <longProp name="ThreadGroup.end_time">1244643768000</longProp>
@@ -145,12 +145,12 @@
         </LoopController>
         <hashTree>
           <RandomVariableConfig guiclass="TestBeanGUI" testclass="RandomVariableConfig" testname="Random find One" enabled="true">
-            <stringProp name="maximumValue">140000</stringProp>
+            <stringProp name="maximumValue">1000</stringProp>
             <stringProp name="minimumValue">1</stringProp>
             <stringProp name="outputFormat"></stringProp>
             <boolProp name="perThread">false</boolProp>
             <stringProp name="randomSeed"></stringProp>
-            <stringProp name="variableName">id</stringProp>
+            <stringProp name="variableName">from</stringProp>
           </RandomVariableConfig>
           <hashTree/>
           <RandomVariableConfig guiclass="TestBeanGUI" testclass="RandomVariableConfig" testname="Random tag" enabled="true">
@@ -173,7 +173,7 @@
             <stringProp name="variableNames"></stringProp>
           </JDBCSampler>
           <hashTree/>
-          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="findAllByTag" enabled="true">
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="findAllByTag" enabled="false">
             <stringProp name="dataSource">connection</stringProp>
             <stringProp name="query">select u.id, u.document from users u 
 where  	u.document-&gt;&apos;entity&apos;-&gt;&apos;tags&apos; @&gt; (&apos;[{&quot;tagId&quot;:&apos; || ? || &apos;}]&apos;)::jsonb and id &gt; ?
@@ -185,6 +185,64 @@ limit 10</stringProp>
             <stringProp name="resultVariable"></stringProp>
             <stringProp name="variableNames"></stringProp>
           </JDBCSampler>
+          <hashTree/>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP Request" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{&#xd;
+    &quot;from&quot; : ${from}, &quot;size&quot; : 20,&#xd;
+    &quot;query&quot;: {&#xd;
+        &quot;bool&quot; : {&#xd;
+            &quot;must&quot; : {&#xd;
+                &quot;query_string&quot; : {&#xd;
+                    &quot;query&quot; : &quot;pedro&quot;&#xd;
+                }&#xd;
+            },&#xd;
+            &quot;filter&quot; : {&#xd;
+                &quot;term&quot; : { &quot;type&quot; : &quot;user&quot; }&#xd;
+            }&#xd;
+        }&#xd;
+    },&#xd;
+	&quot;aggregations&quot;: {&#xd;
+      &quot;tipoDeNavegador&quot;: {&#xd;
+         &quot;terms&quot;: {&#xd;
+            &quot;field&quot;: &quot;browserType&quot;&#xd;
+         }&#xd;
+      },&#xd;
+	  &quot;servicios&quot;: {&#xd;
+		 &quot;terms&quot;: {&#xd;
+            &quot;field&quot;: &quot;servicios.name&quot;&#xd;
+         }&#xd;
+      },&#xd;
+	  &quot;categorias&quot;: {&#xd;
+		 &quot;terms&quot;: {&#xd;
+            &quot;field&quot;: &quot;entity.categories.name&quot;&#xd;
+         }&#xd;
+      }&#xd;
+   }&#xd;
+}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain"></stringProp>
+            <stringProp name="HTTPSampler.port"></stringProp>
+            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+            <stringProp name="HTTPSampler.response_timeout"></stringProp>
+            <stringProp name="HTTPSampler.protocol"></stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+            <stringProp name="HTTPSampler.path">http://localhost:9200/ridermove/users/_search</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <boolProp name="HTTPSampler.monitor">false</boolProp>
+            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          </HTTPSamplerProxy>
           <hashTree/>
         </hashTree>
       </hashTree>

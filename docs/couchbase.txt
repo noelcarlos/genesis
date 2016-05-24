@@ -1,0 +1,27 @@
+Creacion de indices
+
+CREATE PRIMARY INDEX `primary` ON `allianz`;
+CREATE INDEX `id` ON `allianz`(`id`);
+CREATE INDEX `type` ON `allianz`(`type`);
+
+Generator Couchbase Maquina Virtual En Disco Rigido
+
+	Inserted:97.000 items in: 1 minutes 36 seconds 
+	Overall speed: 1001 opers/sec current speed: 896 opers/sec
+
+Generator Couchbase Maquina Virtual En Disco SSD
+
+	Inserted:251.000 items in: 2 minutes 30 seconds 
+	Overall speed: 1664 opers/sec current speed: 1926 opers/sec
+
+Couchbase random read by ID speed Maquina Virtual En Disco SSD, 6 millones de registros
+
+	Read:162.000 items in: 1 minutes 27 seconds 
+	Overall speed: 1853 opers/sec current speed: 1980 opers/sec
+
+Couchbase random findAll limit 10 speed Maquina Virtual En Disco SSD, 6 millones de registros
+	List:2.000 items in: 2 minutes 12 seconds 
+	Overall speed: 15 opers/sec current speed: 15 opers/sec Media 63ms
+
+Couchbase random findAll limit 10 speed Maquina Virtual En Disco SSD, 6 millones de registros, Multithread 10 hilos
+	Overall speed: 68 opers/sec Avg 289ms media 

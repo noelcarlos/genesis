@@ -5,6 +5,8 @@ import java.util.HashMap;
 import org.esmartpoint.dbutil.Cronometro;
 import org.esmartpoint.genesis.output.provider.CouchbaseRepositoryProvider;
 import org.esmartpoint.genesis.output.provider.CouchbaseRepositorySettings;
+import org.esmartpoint.genesis.output.provider.ElasticSearchRepositoryProvider;
+import org.esmartpoint.genesis.output.provider.ElasticSearchRepositorySettings;
 import org.esmartpoint.genesis.output.provider.FileSystemRepositoryProvider;
 import org.esmartpoint.genesis.output.provider.FileSystemRepositorySettings;
 import org.esmartpoint.genesis.output.provider.IDataRepository;
@@ -77,19 +79,28 @@ public class GenesisApp
         	//CouchbaseGeneratorScript script = springContext.getBean(CouchbaseGeneratorScript.class);
         	//PostgresqlGeneratorScript script = springContext.getBean(PostgresqlGeneratorScript.class);
         	
-//        	IDataRepository respository = new CouchbaseRepositoryProvider(CouchbaseRepositorySettings.builder()
-//        		.nodes("192.168.1.12")
-//        		.key("id")
-//        		.bucketName("allianz"));
+        	CouchbaseRepositoryProvider repository = new CouchbaseRepositoryProvider();
         	
-//        	IDataRepository respository = new FileSystemRepositoryProvider(FileSystemRepositorySettings.builder()
+        	repository.setSettings(CouchbaseRepositorySettings.builder()
+        		.nodes("192.168.1.14")
+        		.key("id")
+        		.bucketName("allianz"));
+        	
+//        	IDataRepository repository = new FileSystemRepositoryProvider(FileSystemRepositorySettings.builder()
 //        		.directory("d:/data/users")
 //        		.key("id")
 //        		.levels(1));
-        	PostgresqlRepositoryProvider repository = springContext.getBean(PostgresqlRepositoryProvider.class);
-        	repository.setSettings(PostgresqlRepositorySettings.builder()
-        		.table("users")
-        		.key("id"));
+//        	PostgresqlRepositoryProvider repository = springContext.getBean(PostgresqlRepositoryProvider.class);
+//        	repository.setSettings(PostgresqlRepositorySettings.builder()
+//        		.table("users")
+//        		.key("id"));
+        	
+//        	ElasticSearchRepositoryProvider repository = springContext.getBean(ElasticSearchRepositoryProvider.class);
+//        	repository.setSettings(ElasticSearchRepositorySettings.builder()
+//        		.url("http://localhost:9200")
+//        		.index("ridermove")
+//        		.type("users")
+//        		.key("id"));
         	
         	repository.init();
 

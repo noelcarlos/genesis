@@ -1,0 +1,3 @@
+Performance Elastic Search
+
+https://blog.codecentric.de/en/2014/05/elasticsearch-indexing-performance-cheatsheet/

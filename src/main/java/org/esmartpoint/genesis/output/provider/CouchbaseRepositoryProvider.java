@@ -34,6 +34,10 @@ public class CouchbaseRepositoryProvider implements IDataRepository  {
 	public void init() {
 		cluster = CouchbaseCluster.create(settings.nodes());
 		bucket = cluster.openBucket(settings.bucketName());
+		
+		bucket.bucketManager().createPrimaryIndex("primary", true, false);
+		bucket.bucketManager().createIndex("id", true, false, "id");
+		bucket.bucketManager().createIndex("type", true, false, "type");
 	}
 	
 	public void done() {
