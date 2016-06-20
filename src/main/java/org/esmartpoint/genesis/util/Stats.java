@@ -15,7 +15,6 @@ public class Stats {
 	static DateTime last;
 	static long operationsCounter;
 	static long lastOperationCounter;
-	static long operationsBufferSize;
 
 	static DecimalFormat longIntegerFormat = (DecimalFormat)NumberFormat.getNumberInstance(new Locale("es", "es"));
 	static PeriodFormatter formatter = new PeriodFormatterBuilder()
@@ -32,7 +31,6 @@ public class Stats {
     	last = start;
     	operationsCounter = 0;
     	lastOperationCounter = 0;
-    	operationsBufferSize = 1000;
 	}
 	
 	static public void done() {
@@ -44,7 +42,7 @@ public class Stats {
 		System.out.println("Speed: " + (long)(operationsCounter / (diff / 1000.0))	+ " opers/sec");
 	}
 
-	static public boolean iterate() {
+	static public boolean iterate(int operationsBufferSize) {
 		operationsCounter++;
 		lastOperationCounter++;
 		if (operationsCounter % operationsBufferSize == 0) {
@@ -54,21 +52,21 @@ public class Stats {
 	}
 	
 	static public void printSpeed() {
-		if (operationsCounter % operationsBufferSize == 0) {
-			DateTime span = DateTime.now().minus(start.getMillis());
-			DateTime lastSpan = DateTime.now().minus(last.getMillis());
-			long diff = span.getMillis();
-			long diffSpan = lastSpan.getMillis(); 
-			Period period = new Period(start, DateTime.now());
+		DateTime span = DateTime.now().minus(start.getMillis());
+		DateTime lastSpan = DateTime.now().minus(last.getMillis());
+		long diff = span.getMillis();
+		long diffSpan = lastSpan.getMillis(); 
+		Period period = new Period(start, DateTime.now());
 
-			System.out.println("Inserted:" + longIntegerFormat.format(operationsCounter) + " items in: " + formatter.print(period));
-			System.out.println("Overall speed: " + (long)(operationsCounter / (diff / 1000.0)) 
-				+ " opers/sec current speed: " + (long)(lastOperationCounter / (diffSpan / 1000.0)) + " opers/sec");
+		System.out.println("Inserted:" + longIntegerFormat.format(operationsCounter) + " items in: " + formatter.print(period));
+		System.out.println("Overall speed: " + (long)(operationsCounter / (diff / 1000.0)) 
+			+ " opers/sec current speed: " + (long)(lastOperationCounter / (diffSpan / 1000.0)) + " opers/sec");
+	}
 
-			/* Restart */
-			last = DateTime.now();
-			lastOperationCounter = 0;
-		}
+	static public void restart() {
+		/* Restart */
+		last = DateTime.now();
+		lastOperationCounter = 0;
 	}
 	
 }

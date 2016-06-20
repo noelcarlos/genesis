@@ -227,3 +227,15 @@ ElasticSearch (Disco SSD), Maquina Real
 ElasticSearch (Disco SSD), Maquina Real
 	Busqueda con tres aggregations/facets
 	35 opers/sec  27 ms	
+	
+ElasticSearch (Disco SSD), Maquina Real ajustado a 256 MB	
+	Inserted:5.266.000 items in: 19 hours 40 minutes 37 seconds 
+	Overall speed: 74 opers/sec current speed: 61 opers/sec
+	
+	Busqueda con tres aggregations/facets
+	23.9 opers/sec  41 ms	
+
+ElasticSearch (Disco SSD), Maquina Real ajustado a 256 MB, Operaciones BULK		
+	Inserted:2.058.000 items in: 9 minutes 36 seconds 
+	Overall speed: 3571 opers/sec current speed: 3773 opers/sec	
+	

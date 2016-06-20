@@ -1,3 +1,12 @@
+curl -XPUT 'http://localhost:9200/ridermove/' -d '{
+    "settings" : {
+        "index" : {
+            "number_of_shards" : 1, 
+            "number_of_replicas" : 0 
+        }
+    }
+}'
+
 curl -XGET 'http://localhost:9200/ridermove/users/_search' -d '{
 	"from" : 0, "size" : 20,
 	"_source": ["firstName*", "lastName*"],
@@ -39,3 +48,23 @@ curl -XGET 'http://localhost:9200/ridermove/users/_search' -d '{
         "match_all" : {}
     }
 }'
+
+
+curl -XPUT 'http://localhost:9200/ecms/' -d '{
+    "settings" : {
+        "index" : {
+            "number_of_shards" : 3, 
+            "number_of_replicas" : 2 
+        }
+    }
+}'
+
+curl -XPUT 'http://localhost:9200/ecms/_mapping/docs' -d '{
+	"_all":       { "enabled": true }, 
+	"properties": { 
+    	"title":    { "type": "string", "index":  "no" }, 
+    	"location": { "type": "string", "index":  "no"  }, 
+    	"id":      { "type": "integer" }  
+  	}
+}'
+

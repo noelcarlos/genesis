@@ -32,8 +32,9 @@ public class MongoDbHelper {
 		try {
 			database.getCollection(collectionName).insertOne(Document.parse(body));
 			
-			Stats.iterate();
-			Stats.printSpeed();
+			if (Stats.iterate(1000)) {
+				Stats.printSpeed();
+			}
 		} finally {
 			Cronometro.stop("DATABASE");
 		}

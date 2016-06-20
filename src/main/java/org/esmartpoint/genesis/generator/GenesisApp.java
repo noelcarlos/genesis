@@ -79,12 +79,12 @@ public class GenesisApp
         	//CouchbaseGeneratorScript script = springContext.getBean(CouchbaseGeneratorScript.class);
         	//PostgresqlGeneratorScript script = springContext.getBean(PostgresqlGeneratorScript.class);
         	
-        	CouchbaseRepositoryProvider repository = new CouchbaseRepositoryProvider();
-        	
-        	repository.setSettings(CouchbaseRepositorySettings.builder()
-        		.nodes("192.168.1.14")
-        		.key("id")
-        		.bucketName("allianz"));
+//        	CouchbaseRepositoryProvider repository = new CouchbaseRepositoryProvider();
+//        	
+//        	repository.setSettings(CouchbaseRepositorySettings.builder()
+//        		.nodes("192.168.1.14")
+//        		.key("id")
+//        		.bucketName("allianz"));
         	
 //        	IDataRepository repository = new FileSystemRepositoryProvider(FileSystemRepositorySettings.builder()
 //        		.directory("d:/data/users")
@@ -95,12 +95,18 @@ public class GenesisApp
 //        		.table("users")
 //        		.key("id"));
         	
-//        	ElasticSearchRepositoryProvider repository = springContext.getBean(ElasticSearchRepositoryProvider.class);
+        	ElasticSearchRepositoryProvider repository = springContext.getBean(ElasticSearchRepositoryProvider.class);
+        	repository.setSettings(ElasticSearchRepositorySettings.builder()
+        		.url("http://localhost:9200")
+        		.index("ridermove")
+        		.type("users")
+        		.key("id"));
+        	
 //        	repository.setSettings(ElasticSearchRepositorySettings.builder()
-//        		.url("http://localhost:9200")
-//        		.index("ridermove")
-//        		.type("users")
-//        		.key("id"));
+//	    		.url("http://localhost:9200")
+//	    		.index("ecms")
+//	    		.type("docs")
+//	    		.key("id"));
         	
         	repository.init();
 
@@ -109,9 +115,9 @@ public class GenesisApp
         	
         	Stats.init();
         	script.run();
+        	Stats.done();
         	
         	repository.done();
-        	Stats.done();
 
 //        	System.out.println("EVALUATIONS operations took, " +  PeriodFormat.getDefault().print(new Period(Cronometro.get("EVALUATIONS").sum)));
 //        	System.out.println("DATABASE operations took, " +  PeriodFormat.getDefault().print(new Period(Cronometro.get("DATABASE").sum)));

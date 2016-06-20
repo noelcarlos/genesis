@@ -1,5 +1,8 @@
 package org.esmartpoint.genesis.output.provider;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.codehaus.jettison.json.JSONObject;
 import org.esmartpoint.genesis.helpers.HttpHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +13,8 @@ public class ElasticSearchRepositoryProvider implements IDataRepository  {
 
 	@Autowired HttpHelper httpHelper;
 	ElasticSearchRepositorySettings settings;
+	
+	List<JSONObject> objects = null;
 	
 	public ElasticSearchRepositoryProvider() {
 		
@@ -32,20 +37,38 @@ public class ElasticSearchRepositoryProvider implements IDataRepository  {
 	
 	@Override
 	public <S extends JSONObject> S save(S entity) {
-		try {
-			Integer key = entity.getInt(settings.key());
-			JSONObject res = (JSONObject) httpHelper.post(settings.url() + "/" + settings.index() + "/" 
-					+ settings.type() + "/" + key + "/_create" , entity.toString(), "JSON");
-			return null;
-		} catch (Exception e) {
-			throw new RuntimeException(e);
+		if (objects == null) {
+			try {
+				Integer key = entity.getInt(settings.key());
+				JSONObject res = (JSONObject) httpHelper.post(settings.url() + "/" + settings.index() + "/" 
+						+ settings.type() + "/" + key + "/_create" , entity.toString(), "JSON");
+				return (S)res;
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		} else {
+			objects.add(entity);
+			return entity;
 		}
 	}
 
 	@Override
 	public <S extends JSONObject> Iterable<S> save(Iterable<S> entities) {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			StringBuffer sb = new StringBuffer();
+			for (S entity : entities) {
+				Integer key = entity.getInt(settings.key());
+				sb.append("{ \"create\" : { \"_id\" : ").append(key).append(" } }\r\n");
+				sb.append(entity.toString() + "\r\n").append("\r\n");
+			}
+			
+			JSONObject res = (JSONObject) httpHelper.post(settings.url() + "/" + settings.index() + "/" 
+					+ settings.type() + "/_bulk" , sb.toString(), "JSON");
+
+			return null;
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
@@ -117,10 +140,15 @@ public class ElasticSearchRepositoryProvider implements IDataRepository  {
 
 	@Override
 	public void commit() {
+		if (objects != null) {
+			save(objects);
+		}
+		objects = null;
 	}
 
 	@Override
 	public void begin() {
+		objects = new ArrayList<JSONObject>();
 	}
 	
 }
